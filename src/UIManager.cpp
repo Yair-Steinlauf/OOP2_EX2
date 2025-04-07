@@ -12,7 +12,7 @@ UIManager::UIManager(sf::RenderWindow& win, DialogueManager& dManager)
  
     font.loadFromFile("C:/Windows/Fonts/arialbd.ttf");
     
-
+    
     // ✅ Fix: Setup all buttons using setupButton()
     setupButton(buttonFlight, textFlight, "Flight Booking", 150);
     setupButton(buttonHotel, textHotel, "Hotel Booking", 220);
@@ -27,7 +27,7 @@ void UIManager::setupButton(sf::RectangleShape& button, sf::Text& text, const st
     button.setSize(sf::Vector2f(300, 50));
     button.setFillColor(sf::Color::Blue);
     button.setPosition(100, y);
-
+    
     text.setFont(font);  // ✅ Fix: Use class member `font`
     text.setString(label);
     text.setCharacterSize(24);

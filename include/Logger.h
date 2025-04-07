@@ -15,6 +15,9 @@ private:
     static std::mutex mutex;
     std::ofstream logFile;
     Logger(); // Private constructor to prevent direct instantiation
+    Logger(Logger& other) = delete;  //Done: deleted copy constructor
+    Logger& operator=(Logger& other) = delete; //Done: deleted assing operator
+    
 
 public:
     static Logger* getInstance();

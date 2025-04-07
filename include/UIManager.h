@@ -11,9 +11,10 @@ private:
 
     // ✅ Fix: Declare buttons and texts
     sf::Font font;
+    //TODO: לבנות מחלקת כפתתור, הכוללת מרובע וטקסט
     sf::RectangleShape buttonFlight, buttonHotel, buttonCar, buttonEvent, buttonTrain;
     sf::Text textFlight, textHotel, textCar, textEvent, textTrain;
-
+    
     // ✅ Fix: Declare setupButton
     void setupButton(sf::RectangleShape& button, sf::Text& text, const std::string& label, float y);
 
