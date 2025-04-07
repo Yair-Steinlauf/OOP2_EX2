@@ -6,6 +6,9 @@ class Field : public BaseField {
 private:
 	T m_data;
 public:
+	Field(T& data) {
+		m_data = data;
+	}
 	//default validator
 	bool validate() {
 		return true;
