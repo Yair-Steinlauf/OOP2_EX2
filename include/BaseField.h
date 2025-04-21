@@ -1,13 +1,15 @@
 #pragma once
-#include "Button.h"
+#include "SFML/Graphics.hpp"
 
 
 
 
-class BaseField : public Button{
+class BaseField{
 protected:
+	sf::Text m_text;
+
 	bool isClicked = false;
 public:
-	BaseField(Button& button);
+	BaseField();
 	
 };
