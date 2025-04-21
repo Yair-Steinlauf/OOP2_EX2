@@ -1,15 +1,15 @@
 #pragma once
 #include "SFML/Graphics.hpp"
-
+#include "Text.h"
 
 
 
 class BaseField{
 protected:
-	sf::Text m_text;
-
+	Text m_text;
+	sf::RectangleShape m_rect;
 	bool isClicked = false;
 public:
-	BaseField();
-	
+	BaseField(sf::Vector2f location);
+	virtual void draw(sf::RenderWindow& window) = 0;
 };

@@ -1,4 +1,3 @@
-#include "Adrress.h"
 #include "Address.h"
 
 std::string Address::getCity() const
@@ -15,6 +14,8 @@ int Address::getNumber() const
 {
 	return m_number;
 }
+
+
 
 Address::Address(std::string street, std::string city, int number)
 {
@@ -40,7 +41,10 @@ Address& Address::operator=(const Address& other)
 }
 std::istream& operator>>(std::istream& is, Address& address)
 {
-	is >> address.m_street >> address.m_number >> address.m_city;
+	std::string street, city;
+	int number;
+	is >> street >> number >> city;
+	address = Address(street, city, number);
 	return is;
 }
 std::ostream& operator<<(std::ostream& os, const Address& address)

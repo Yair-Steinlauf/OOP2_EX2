@@ -5,6 +5,13 @@
 #include <vector>
 #include <string>
 #include <array>
+#include <Text.h>
+#include <DataLoader.h>
+#include <memory>
+#include <Field.h>
+#include "NameValidator.h"
+
+
 class DialogueManager;
 
 struct PersonalInfo {
@@ -16,6 +23,8 @@ struct PersonalInfo {
 
 class BookingForm {
 protected:
+	std::vector<Text> m_textFields;
+    std::vector<std::unique_ptr<BaseField>> m_inputFields;
     std::vector<std::string> fieldLabels;
     std::vector<std::string> userInput;
     std::size_t activeField = 0;

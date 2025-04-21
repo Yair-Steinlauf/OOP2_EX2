@@ -4,5 +4,5 @@
 
 class DateValidator : public BaseValidator<Date> {
 public:
-	bool validate(const Date& date);
+	bool validate(const Date& date) const;
 };

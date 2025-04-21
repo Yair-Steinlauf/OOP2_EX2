@@ -15,6 +15,11 @@ public:
 	bool validate() {
 		m_validator->validate(m_data);
 	}
+	void draw(sf::RenderWindow& window) override;
 };
 
-
+template<typename T>
+inline void Field<T>::draw(sf::RenderWindow& window)
+{
+	m_data.draw(window);
+}

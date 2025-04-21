@@ -4,8 +4,14 @@
 #include <ctime>  // For getting current date
 
 BookingForm::BookingForm(sf::RenderWindow& win, DialogueManager* manager) :window(win), formManager(manager) {
-    fieldLabels = { "Name:", "ID:", "Address:", "Email:" };  // ✅ Add common fields
-    userInput.resize(fieldLabels.size(), "");  // Initialize input fields
+    fieldLabels = { "Name:", "ID:", "Address:", "Email:" };
+
+    int yOffset = 60;
+    for (std::size_t i = 0; i < fieldLabels.size(); ++i) {
+        m_textFields.push_back(Text(fieldLabels[i],sf::Vector2f(20, yOffset)));
+        m_inputFields.push_back(std::make_unique<Field>(250, yOffset - 5));
+        yOffset += 50;
+    }
 }
 
 void BookingForm::openConfirmationWindow() {

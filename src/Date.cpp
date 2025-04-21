@@ -44,11 +44,11 @@ bool Date::operator!=(const Date& other) const
 {
 	return !(*this == other);
 }
-std::istream& operator>>(std::istream& is, Date& date)
-{
-	is >> m_day >> m_month >> m_year;
-	return is;
-}
+//std::istream& operator>>(std::istream& is, Date& date)
+//{
+//	is >> m_day >> m_month >> m_year;
+//	return is;
+//}
 std::ostream& operator<<(std::ostream& os, const Date& date)
 {
 	os << date.getDay() << "/" << date.getMonth() << "/" << date.getYear();

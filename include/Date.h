@@ -1,5 +1,5 @@
 #pragma once
-
+#include <iostream>
 class Date {
 private:
 	int m_day, m_month, m_year;

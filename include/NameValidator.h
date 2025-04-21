@@ -4,5 +4,5 @@
 
 class NameValidator : public BaseValidator<std::string> {
 public:
-	bool validate(const std::string& name) override;
+	bool validate(const std::string& name) const override;
 };
