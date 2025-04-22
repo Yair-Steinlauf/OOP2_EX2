@@ -26,3 +26,8 @@ void Text::setLocation(sf::Vector2f newLocation)
 {
 	m_text.setPosition(newLocation);
 }
+
+void Text::setFillColor(const sf::Color& color)
+{
+	m_text.setFillColor(color);
+}

@@ -2,11 +2,16 @@
 #include "Text.h"
 
 class Button{
-private:
+protected:
 	Text m_text;
 	sf::RectangleShape m_rectangle;
+	bool m_isClicked = false;
 public:
-	Button(Text& text, sf::Vector2f size, sf::Color fillColor, sf::Vector2f location);
+	Button(const Text& text = Text());
+	virtual bool contains(sf::Vector2f& coords);
 	void draw(sf::RenderWindow& window);
-
+	virtual void onClick() = 0;
+	virtual void update() = 0;
+	~Button() = default;
 };
+

@@ -11,5 +11,6 @@ protected:
 	bool isClicked = false;
 public:
 	BaseField(sf::Vector2f location);
+	void setLocation(sf::Vector2f newLocation);
 	virtual void draw(sf::RenderWindow& window) = 0;
 };
