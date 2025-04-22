@@ -11,8 +11,26 @@ CarRentalForm::CarRentalForm(sf::RenderWindow& win, DialogueManager* manager)
         "GPS needed?", "Child Seat needed?",
         "Car Type:"
         });
-
     userInput.resize(fieldLabels.size(), "");  // ✅ Resize input fields
+    //Pickup Location
+    m_inputFields.push_back(std::make_unique<Field<std::string>>(&NameValidator::getInstance()));
+    //Pickup Date
+    m_inputFields.push_back(std::make_unique<Field<Date>>(&DateValidator::getInstance())); 
+    //Rent total days
+    //m_inputFields.push_back(std::make_unique<Field<Address>>(&AddressValidator::getInstance())); TODO: rentTotalDays validator
+    //GPS needed ?
+    //m_inputFields.push_back(std::make_unique<Field<std::string>>(&EmailValidator::getInstance())); TODO: GPS needed? validator
+    //Child Seat needed ?
+    //m_inputFields.push_back(std::make_unique<Field<std::string>>(&EmailValidator::getInstance())); TODO: Child Seat needed?validator
+    //Car Type
+    //m_inputFields.push_back(std::make_unique<Field<std::string>>(&EmailValidator::getInstance())); TODO: Car Type validator
+
+    int yOffset = 60 + 50*m_textFields.size();
+    for (std::size_t i = 0; i < fieldLabels.size(); ++i) {
+        m_textFields.push_back(Text(fieldLabels[i], sf::Vector2f(20, yOffset)));
+        m_inputFields[i].get()->setLocation(sf::Vector2f(250, yOffset - 5));
+        yOffset += 50;
+    }
     setDefaultValues();
 }
 
