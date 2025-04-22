@@ -13,6 +13,13 @@ BookingForm::BookingForm(sf::RenderWindow& win, DialogueManager* manager) :windo
 		m_inputFields.back().get()->setLocation(sf::Vector2f(250, yOffset - 5));
         yOffset += 50;
     }
+
+    m_inputFields.push_back(std::make_unique<Field<std::string>>("Name:", &NameValidator::getInstance()));
+    m_inputFields.push_back(std::make_unique<Field<Date>>("ID:", &DateValidator::getInstance()));
+    m_inputFields.push_back(std::make_unique<Field<Address>>("Address:", &AddressValidator::getInstance()));
+    m_inputFields.push_back(std::make_unique<Field<std::string>>("Email:", &EmailValidator::getInstance()));
+    
+
 }
 
 void BookingForm::openConfirmationWindow() {
