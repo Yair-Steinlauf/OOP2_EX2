@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseField.h"
 #include "BaseValidator.h"
-
+#include "istream"
 
 class NameValidator;
 template<typename T>
@@ -10,8 +10,7 @@ private:
 	T m_data;
 	BaseValidator<T>* m_validator;
 public:
-	Field(T data, BaseValidator<T>* validator) {
-		m_data = data;
+	Field(BaseValidator<T>* validator) {
 		m_validator = validator;
 	}
 	//default validator
@@ -23,4 +22,11 @@ public:
 		m_text.draw(window);
 	}
 };
+
+
+template <typename T>
+std::istream& operator>>(std::istream& in, T& data) {
+	in >> data;
+	return in;
+}
 
