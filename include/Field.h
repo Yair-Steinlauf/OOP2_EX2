@@ -1,6 +1,8 @@
 #pragma once
 #include "BaseField.h"
 #include "BaseValidator.h"
+
+
 class NameValidator;
 template<typename T>
 class Field : public BaseField {
