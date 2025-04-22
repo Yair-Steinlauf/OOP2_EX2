@@ -11,7 +11,7 @@ BookingForm::BookingForm(sf::RenderWindow& win, DialogueManager* manager) :windo
         m_textFields.push_back(Text(fieldLabels[i],sf::Vector2f(20, yOffset)));
         yOffset += 50;
     }
-    m_inputFields.push_back(std::make_unique<Field<std::string>>("" , NameValidator()));
+    m_inputFields.push_back(std::make_unique<Field<std::string>>("", &NameValidator::getInstance()));
 }
 
 void BookingForm::openConfirmationWindow() {

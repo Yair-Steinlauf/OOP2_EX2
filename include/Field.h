@@ -8,18 +8,17 @@ private:
 	T m_data;
 	BaseValidator<T>* m_validator;
 public:
-	Field(T& data, BaseValidator<T>* validator) {
+	Field(T data, BaseValidator<T>* validator) {
 		m_data = data;
+		m_validator = validator;
 	}
 	//default validator
 	bool validate() {
 		m_validator->validate(m_data);
 	}
-	void draw(sf::RenderWindow& window) override;
+	void draw(sf::RenderWindow& window) override {
+		window.draw(m_rect);
+		m_text.draw(window);
+	}
 };
 
-template<typename T>
-inline void Field<T>::draw(sf::RenderWindow& window)
-{
-	m_data.draw(window);
-}

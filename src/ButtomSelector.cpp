@@ -9,10 +9,7 @@ ButtonSelector::ButtonSelector(const std::string& text, sf::Vector2f location) :
 	m_rectangle.setOutlineColor(sf::Color(160, 160, 160));
 }
 
-void ButtonSelector::onClick()
-{
-	m_isClicked = true;
-}
+
 
 void ButtonSelector::update()
 { 

@@ -10,7 +10,7 @@ public:
 	Button(const Text& text = Text());
 	virtual bool contains(sf::Vector2f& coords);
 	void draw(sf::RenderWindow& window);
-	virtual void onClick() = 0;
+	virtual void onClick();
 	virtual void update() = 0;
 	~Button() = default;
 };
