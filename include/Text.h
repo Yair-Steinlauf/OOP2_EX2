@@ -12,6 +12,7 @@ public:
 		, unsigned int characterSize = 18, sf::Font font = DataLoader::getP2Font());
 	void draw(sf::RenderWindow& window);
 	void setText(std::string& text);
+	std::string getText() const;
 	void setLocation(sf::Vector2f newLocation);
 	void setFillColor(const sf::Color& color);
 };
