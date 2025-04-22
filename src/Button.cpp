@@ -6,7 +6,7 @@ Button::Button(const Text& text)
 {
 }
 
-bool Button::contains(sf::Vector2f& coords)
+bool Button::contains(const sf::Vector2f& coords)
 {
 	if (m_rectangle.getGlobalBounds().contains(coords))
 		return true;
@@ -17,6 +17,11 @@ void Button::draw(sf::RenderWindow& window)
 {
 	window.draw(m_rectangle);
 	m_text.draw(window);
+}
+
+std::string Button::getText() const
+{
+	return m_text.getText();
 }
 
 void Button::onClick()
