@@ -1,4 +1,5 @@
-﻿#include "CarRentalForm.h"
+﻿#include "ConfirmationButton.h"
+#include "CarRentalForm.h"
 #include "DialogueManager.h"
 #include <iostream>
 #include <ctime>  // For getting current date
@@ -12,6 +13,8 @@ CarRentalForm::CarRentalForm(sf::RenderWindow& win, DialogueManager* manager)
         "Car Type:"
         });
 
+    //😶‍🌫️🤗😎
+    m_inputFields.push_back(std::make_unique<Field>("Pickup Location:", )
     userInput.resize(fieldLabels.size(), "");  // ✅ Resize input fields
     setDefaultValues();
 }
@@ -93,25 +96,31 @@ void CarRentalForm::render(sf::RenderWindow& window) {
     // ✅ "Done" and "Cancel" Buttons (positioned dynamically)
     int buttonY = yOffset + 40;
 
-    sf::RectangleShape submitButton(sf::Vector2f(140, 40));
-    submitButton.setPosition(20, buttonY);
-    submitButton.setFillColor(sf::Color(50, 150, 50));
-    window.draw(submitButton);
 
-    sf::Text submitText("DONE", font, 20);
-    submitText.setFillColor(sf::Color::White);
-    submitText.setPosition(50, buttonY + 10);
-    window.draw(submitText);
+    //sf::RectangleShape submitButton(sf::Vector2f(140, 40));
+    //submitButton.setPosition(20, buttonY);
+    //submitButton.setFillColor(sf::Color(50, 150, 50));
+    //window.draw(submitButton);
 
-    sf::RectangleShape cancelButton(sf::Vector2f(140, 40));
-    cancelButton.setPosition(200, buttonY);
-    cancelButton.setFillColor(sf::Color(180, 0, 0));
-    window.draw(cancelButton);
+    //sf::Text submitText("DONE", font, 20);
+    //submitText.setFillColor(sf::Color::White);
+    //submitText.setPosition(50, buttonY + 10);
+    //window.draw(submitText);
 
-    sf::Text cancelText("CANCEL", font, 20);
-    cancelText.setFillColor(sf::Color::White);
-    cancelText.setPosition(230, buttonY + 10);
-    window.draw(cancelText);
+    //sf::RectangleShape cancelButton(sf::Vector2f(140, 40));
+    //cancelButton.setPosition(200, buttonY);
+    //cancelButton.setFillColor(sf::Color(180, 0, 0));
+    //window.draw(cancelButton);
+
+    //sf::Text cancelText("CANCEL", font, 20);
+    //cancelText.setFillColor(sf::Color::White);
+    //cancelText.setPosition(230, buttonY + 10);
+    //window.draw(cancelText);
+
+    // new done cancel:
+    ConfirmationButton done("Done", sf::Vector2f(20, buttonY), sf::Color(50, 150, 50));
+    ConfirmationButton cancel("Cancel", sf::Vector2f(200, buttonY), sf::Color(180, 0, 0));
+    
 }
 
 void CarRentalForm::handleInput(sf::Event event) {

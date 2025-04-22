@@ -10,6 +10,13 @@
 #include <memory>
 #include <Field.h>
 #include "NameValidator.h"
+#include "Date.h"
+#include "DateValidator.h"
+#include "Address.h"
+#include "AddressValidator.h"
+#include "EmailValidator.h"
+
+
 
 
 class DialogueManager;
@@ -23,9 +30,12 @@ struct PersonalInfo {
 
 class BookingForm {
 protected:
+    // we add:
 	std::vector<Text> m_textFields;
     std::vector<std::unique_ptr<BaseField>> m_inputFields;
     std::vector<std::string> fieldLabels;
+
+
     std::vector<std::string> userInput;
     std::size_t activeField = 0;
     sf::Clock cursorTimer;
