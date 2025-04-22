@@ -22,12 +22,12 @@ void BaseField::draw(sf::RenderWindow& window)
 	window.draw(m_rect);
 }
 
-bool BaseField::contains(sf::Vector2f& coords)
+bool BaseField::contains(const sf::Vector2f& coords)
 {
     return m_rect.getGlobalBounds().contains(coords);
 }
 
-void BaseField::update(sf::Time& time)
+void BaseField::update(const sf::Time& time)
 {
 	m_text.setText(m_userInput);
 	if (isClicked)
@@ -42,4 +42,9 @@ void BaseField::update(sf::Time& time)
     {
         m_text.setFillColor(sf::Color(60, 60, 60));
     }
+}
+
+void BaseField::setUserInput(std::string input)
+{
+    m_userInput = input;
 }
