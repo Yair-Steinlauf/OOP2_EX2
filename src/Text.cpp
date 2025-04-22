@@ -22,6 +22,11 @@ void Text::setText(std::string& text)
 	m_text.setString(text);
 }
 
+std::string Text::getText() const
+{
+	return m_text.getString();
+}
+
 void Text::setLocation(sf::Vector2f newLocation)
 {
 	m_text.setPosition(newLocation);

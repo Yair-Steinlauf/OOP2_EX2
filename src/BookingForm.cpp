@@ -9,9 +9,10 @@ BookingForm::BookingForm(sf::RenderWindow& win, DialogueManager* manager) :windo
     int yOffset = 60;
     for (std::size_t i = 0; i < fieldLabels.size(); ++i) {
         m_textFields.push_back(Text(fieldLabels[i],sf::Vector2f(20, yOffset)));
+        m_inputFields.push_back(std::make_unique<Field<std::string>>("", &NameValidator::getInstance()));
+		m_inputFields.back().get()->setLocation(sf::Vector2f(250, yOffset - 5));
         yOffset += 50;
     }
-    m_inputFields.push_back(std::make_unique<Field<std::string>>("", &NameValidator::getInstance()));
 }
 
 void BookingForm::openConfirmationWindow() {
