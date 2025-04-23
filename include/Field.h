@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseField.h"
 #include "BaseValidator.h"
-#include "istream"
+#include "iostream"
 
 class NameValidator;
 template<typename T>
@@ -25,8 +25,14 @@ public:
 
 
 template <typename T>
-std::istream& operator>>(std::istream& in, T& data) {
-	in >> data;
+std::istream& operator>>(std::istream& in, Field<T>& me) {
+	in >> me.m_data;
 	return in;
+}
+
+template <typename T>
+std::ostream& operator<<(std::ostream& out, Field<T>& me) {
+	out << me.m_data;
+	return out;
 }
 
