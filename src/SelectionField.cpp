@@ -1,15 +1,15 @@
 #include "SelectionField.h"
+#include "DefualtValidator.h"
 
-
-SelectionField::SelectionField(Text lable, BaseField field, std::vector<SelectionButton> buttons)
-	:m_lable(lable), m_buttons(buttons)
+SelectionField::SelectionField(std::vector<SelectionButton> buttons)
+	:Field<std::string>(std::make_unique<DefaultValidator>()), m_buttons(buttons)
 {
-	m_field = std::make_unique<BaseField>(field);
+
 }
 
 void SelectionField::update(const sf::Time& time)
 {
-	m_field.get()->update(time);
+	BaseField::update(time);
 	for (auto& button : m_buttons)
 		button.update();
 

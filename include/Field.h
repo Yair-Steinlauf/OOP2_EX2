@@ -2,15 +2,16 @@
 #include "BaseField.h"
 #include "BaseValidator.h"
 #include "iostream"
-
+#include "memory"
 class NameValidator;
 template<typename T>
 class Field : public BaseField {
 private:
 	T m_data;
+	std::unique_ptr<BaseValidator<T>> m_validator;
 	BaseValidator<T>* m_validator;
 public:
-	Field(BaseValidator<T>* validator) {
+	Field(std::unique_ptr<BaseValidator<T>> validator) {
 		m_validator = validator;
 	}
 	//default validator

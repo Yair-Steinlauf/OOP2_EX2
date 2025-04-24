@@ -1,13 +1,14 @@
 #include "Text.h"
 
-Text::Text(std::string text, sf::Vector2f location, sf::Color color, sf::Text::Style style,
+Text::Text(const std::string& text, sf::Vector2f location, sf::Color color, sf::Text::Style style,
 	unsigned int characterSize, sf::Font font)
+	:m_text()
 {
 	m_text.setString(text);
 	m_text.setFillColor(color);
 	m_text.setStyle(style);
 	m_text.setCharacterSize(characterSize);
-	m_text.setFont(font);
+	m_text.setFont(DataLoader::getP2Font());
 	m_text.setPosition(location);
 }
 

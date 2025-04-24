@@ -8,8 +8,7 @@ CarRentalForm::CarRentalForm(sf::RenderWindow& win, DialogueManager* manager)
     fieldLabels.insert(fieldLabels.end(), {
         "Pickup Location:",
         "Pickup Date:", "Rent total days:",
-        "GPS needed?", "Child Seat needed?",
-        "Car Type:"
+        "GPS needed?", "Child Seat needed?","Car Type:"
         });
     userInput.resize(fieldLabels.size(), "");  // ✅ Resize input fields
     //Pickup Location
@@ -17,20 +16,42 @@ CarRentalForm::CarRentalForm(sf::RenderWindow& win, DialogueManager* manager)
     //Pickup Date
     m_inputFields.push_back(std::make_unique<Field<Date>>(&DateValidator::getInstance())); 
     //Rent total days
-    //m_inputFields.push_back(std::make_unique<Field<Address>>(&AddressValidator::getInstance())); TODO: rentTotalDays validator
+    m_inputFields.push_back(std::make_unique<Field<Address>>(&AddressValidator::getInstance())); //TODO: rentTotalDays validator
     //GPS needed ?
-    //m_inputFields.push_back(std::make_unique<Field<std::string>>(&EmailValidator::getInstance())); TODO: GPS needed? validator
+    m_inputFields.push_back(std::make_unique<Field<std::string>>(&EmailValidator::getInstance())); //TODO: GPS needed? validator
     //Child Seat needed ?
-    //m_inputFields.push_back(std::make_unique<Field<std::string>>(&EmailValidator::getInstance())); TODO: Child Seat needed?validator
+    m_inputFields.push_back(std::make_unique<Field<std::string>>(&EmailValidator::getInstance())); //TODO: Child Seat needed?validator
     //Car Type
-    //m_inputFields.push_back(std::make_unique<Field<std::string>>(&EmailValidator::getInstance())); TODO: Car Type validator
+    m_inputFields.push_back(std::make_unique<Field<std::string>>(&EmailValidator::getInstance())); //TODO: Car Type validator
 
     int yOffset = 60 + 50*m_textFields.size();
-    for (std::size_t i = 0; i < fieldLabels.size(); ++i) {
+    for (std::size_t i = m_textFields.size(); i < fieldLabels.size(); ++i) {
         m_textFields.push_back(Text(fieldLabels[i], sf::Vector2f(20, yOffset)));
         m_inputFields[i].get()->setLocation(sf::Vector2f(250, yOffset - 5));
         yOffset += 50;
     }
+    yOffset -= 10;
+    float carTypeButtonX = 20; 
+    std::vector<SelectionButton> selectionButtons;
+    for (int i = 0; i < carTypeSelection.size(); ++i) {
+        selectionButtons.push_back(SelectionButton(carTypeSelection[i], sf::Vector2f(carTypeButtonX, yOffset), sf::Vector2f(90, 30)));
+        //sf::RectangleShape roomButton(sf::Vector2f(90, 30));
+        //roomButton.setPosition(carTypeButtonX, yOffset);
+        //roomButton.setFillColor(selectedCarType == i ? sf::Color(0, 120, 255) : sf::Color::White);  // ✅ Highlight selected
+        //roomButton.setOutlineThickness(2);
+        //roomButton.setOutlineColor(sf::Color(160, 160, 160));
+        //window.draw(roomButton);
+
+        //sf::Text roomText(carTypeSelection[i], font, 16);
+        //roomText.setFillColor(selectedCarType == i ? sf::Color::White : sf::Color::Black);
+        //roomText.setPosition(carTypeButtonX + 10, yOffset + 5);
+        //window.draw(roomText);
+
+        carTypeButtonX += 105;  // ✅ Increased spacing
+    }
+    m_selectionField.push_back(SelectionField(Text("Car Type:"), std::move(m_inputFields.back()), selectionButtons));
+    m_inputFields.resize(m_inputFields.size() - m_selectionField.size());
+
     setDefaultValues();
 }
 
@@ -66,7 +87,17 @@ void CarRentalForm::render(sf::RenderWindow& window) {
 
     // ✅ Render input fields dynamically
     int yOffset = 60;
-    for (std::size_t i = 0; i < fieldLabels.size(); ++i) {
+
+
+    for (auto& label : m_textFields) {
+        label.draw(window);
+    }
+    for (auto& field : m_inputFields) {
+        field.get()->draw(window);
+    }
+    for (auto& selectionField : m_selectionField)
+        selectionField.draw(window);
+    /*for (std::size_t i = 0; i < fieldLabels.size(); ++i) {
         sf::Text label(fieldLabels[i], font, 18);
         label.setFillColor(sf::Color(60, 60, 60));
         label.setPosition(20, yOffset);
@@ -90,24 +121,7 @@ void CarRentalForm::render(sf::RenderWindow& window) {
         window.draw(inputText);
 
         yOffset += 50;
-    }
-    yOffset -= 10;
-    float carTypeButtonX = 20;
-    for (int i = 0; i < carTypeSelection.size(); ++i) {
-        sf::RectangleShape roomButton(sf::Vector2f(90, 30));
-        roomButton.setPosition(carTypeButtonX, yOffset);
-        roomButton.setFillColor(selectedCarType == i ? sf::Color(0, 120, 255) : sf::Color::White);  // ✅ Highlight selected
-        roomButton.setOutlineThickness(2);
-        roomButton.setOutlineColor(sf::Color(160, 160, 160));
-        window.draw(roomButton);
-
-        sf::Text roomText(carTypeSelection[i], font,16);
-        roomText.setFillColor(selectedCarType == i ? sf::Color::White : sf::Color::Black);
-        roomText.setPosition(carTypeButtonX+10, yOffset + 5);
-        window.draw(roomText);
-
-        carTypeButtonX += 105;  // ✅ Increased spacing
-    }
+    }*/
     // ✅ "Done" and "Cancel" Buttons (positioned dynamically)
     int buttonY = yOffset + 40;
 
