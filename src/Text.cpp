@@ -37,3 +37,8 @@ sf::Text& Text::getText()
 {
 	return m_text;
 }
+
+std::string Text::getString()
+{
+	return m_text.getString();
+}

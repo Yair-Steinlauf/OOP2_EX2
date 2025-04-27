@@ -12,13 +12,15 @@ protected:
 	
 
 public:
-	BaseField(sf::Vector2f location);
+	BaseField(sf::Vector2f location = sf::Vector2f(0,0));
 	void setLocation(sf::Vector2f newLocation);
 	void handleInput(sf::Event event);
 	bool contains(sf::Vector2f location);
 	virtual void draw(sf::RenderWindow& window);
 	void onPressClick();
 	void onReleaseClick();
+	void setText(const std::string text);
+	virtual ~BaseField() = default;
 
 
 };

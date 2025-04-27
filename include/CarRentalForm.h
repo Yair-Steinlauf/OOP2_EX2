@@ -5,6 +5,7 @@
 #include "BookingForm.h"
 #include <array>
 #include <vector>
+#include "SelectionField.h"
 
 class CarRentalForm : public BookingForm {
 public:
@@ -18,6 +19,7 @@ private:
     void setDefaultValues();
     std::array<std::string, 5> carTypeSelection = { "Economy","Compact","Sedan","SUV","Luxury"};
     int selectedCarType = 0;
+    SelectionField m_selectionField;
 };
 
 #endif // CARRENTALFORM_H

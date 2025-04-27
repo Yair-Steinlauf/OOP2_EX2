@@ -20,6 +20,9 @@ CarRentalForm::CarRentalForm(sf::RenderWindow& win, DialogueManager* manager)
     m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
     m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
     m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
+    
+    std::vector<std::unique_ptr<SelectionButton>> selectionButton;
+    
 
 
 
@@ -29,9 +32,33 @@ CarRentalForm::CarRentalForm(sf::RenderWindow& win, DialogueManager* manager)
         m_inputFields[i].get()->setLocation(sf::Vector2f(250, yOffset));
         yOffset += 50;
     }
-    //userInput.resize(fieldLabels.size(), "");  // ✅ Resize input fields
-    //setDefaultValues();
-}
+
+
+   yOffset -= 10;
+   float carTypeButtonX = 20;
+   for (int i = 0; i < carTypeSelection.size(); ++i) {
+       selectionButton.push_back(std::make_unique<SelectionButton>(carTypeSelection[i], sf::Vector2f(carTypeButtonX, yOffset)));
+       carTypeButtonX += 105;  // ✅ Increased spacing
+
+   }
+   auto field = std::move(m_inputFields.back());
+   m_inputFields.pop_back();
+   m_selectionField = SelectionField(std::move(field), std::move(selectionButton));
+
+   //    sf::RectangleShape roomButton(sf::Vector2f(90, 30));
+   //    roomButton.setPosition(carTypeButtonX, yOffset);
+   //    roomButton.setFillColor(selectedCarType == i ? sf::Color(0, 120, 255) : sf::Color::White);  // ✅ Highlight selected
+   //    roomButton.setOutlineThickness(2);
+   //    roomButton.setOutlineColor(sf::Color(160, 160, 160));
+   //    window.draw(roomButton);
+
+   //    sf::Text roomText(carTypeSelection[i], font, 16);
+   //    roomText.setFillColor(selectedCarType == i ? sf::Color::White : sf::Color::Black);
+   //    roomText.setPosition(carTypeButtonX+10, yOffset + 5);
+   //    window.draw(roomText);
+  }
+
+
 
 void CarRentalForm::setDefaultValues() {
     time_t now = time(0);
@@ -69,6 +96,7 @@ void CarRentalForm::render(sf::RenderWindow& window) {
     for (auto& object : m_textFields) {
         object.draw(window);
     }
+    m_selectionField.draw(window);
 
     // ✅ Render input fields dynamically
    int yOffset = 60;
@@ -151,6 +179,9 @@ void CarRentalForm::handleInput(sf::Event event) {
                 m_inputFields[i].get()->onPressClick();
             }
         }
+        if (m_selectionField.contains(mousePos))
+            m_selectionField.handleEvent(event);
+
     }
     if (event.type == sf::Event::TextEntered) {
         m_inputFields[activeField].get()->handleInput(event);

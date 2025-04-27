@@ -61,3 +61,8 @@ void BaseField::onReleaseClick()
     m_isClicked = false;
     m_rect.setOutlineColor(sf::Color(160, 160, 160));
 }
+
+void BaseField::setText(const std::string text)
+{
+    m_text.setText(text);
+}

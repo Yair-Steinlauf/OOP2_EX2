@@ -15,4 +15,5 @@ public:
 	void setLocation(sf::Vector2f newLocation);
 	void setFillColor(const sf::Color& color);
 	sf::Text& getText();
+	std::string getString();
 };
