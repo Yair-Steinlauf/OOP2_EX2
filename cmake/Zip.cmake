@@ -1,5 +1,5 @@
 # Zip target generates .zip file in the parent dir of the project, but only if it builds correctly
-# ZipBackup target generates similar .zip file even if it doesn't build, and adds a timestamp to the filename
+# ZipBackup target generates similar .zip file even if it doesn'Type build, and adds a timestamp to the filename
 
 set (CPACK_INCLUDE_TOPLEVEL_DIRECTORY ON)
 set (CPACK_SOURCE_GENERATOR "ZIP")

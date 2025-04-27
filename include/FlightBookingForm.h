@@ -13,7 +13,7 @@ private:
         std::make_pair("Noon", false),
         std::make_pair("Evening", false),
         std::make_pair("Night", false),
-        std::make_pair("Don't Care", true)  // ✅ Default selection
+        std::make_pair("Don'Type Care", true)  // ✅ Default selection
     };
 
 public:

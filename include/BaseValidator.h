@@ -1,9 +1,17 @@
 #pragma once
 #include <string>
-template <typename T>
+
+class AddressValidator;
+class IDValidator;
+class EmailValidator;
+class DateValidator;
+
+template <typename Type>
+
+
 class BaseValidator {
 public:
-	virtual bool validate(const T& object) const = 0;
+	virtual bool validate(const Type& object) const = 0;
 	virtual ~BaseValidator() = default;
 };
 

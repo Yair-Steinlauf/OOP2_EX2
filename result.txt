@@ -25,7 +25,7 @@ File: BaseValidator.h
 --------------------------------------------------
 #pragma once
 
-template <typename T>
+template <typename Type>
 class BaseValidator {
 public:
 	virtual bool validate(std::string text) = 0;
@@ -213,13 +213,13 @@ File: Field.h
 #pragma once
 #include "BaseField.h"
 #include "BaseValidator.h"
-template<typename T>
+template<typename Type>
 class Field : public BaseField {
 private:
-	T m_data;
-	BaseValidator<T> m_validator;
+	Type m_data;
+	BaseValidator<Type> m_validator;
 public:
-	Field(T& data) {
+	Field(Type& data) {
 		m_data = data;
 	}
 	//default validator
@@ -269,7 +269,7 @@ private:
         std::make_pair("Noon", false),
         std::make_pair("Evening", false),
         std::make_pair("Night", false),
-        std::make_pair("Don't Care", true)  // ✅ Default selection
+        std::make_pair("Don'Type Care", true)  // ✅ Default selection
     };
 
 public:
@@ -400,7 +400,7 @@ private:
             std::make_pair("Noon", false),
             std::make_pair("Evening", false),
             std::make_pair("Night", false),
-            std::make_pair("Don't Care", true)  // ✅ Default selection
+            std::make_pair("Don'Type Care", true)  // ✅ Default selection
     };
     std::array<std::pair<std::string, bool>, 4> specialSelection = {
         std::make_pair("Quiet Zone", false),
@@ -1052,7 +1052,7 @@ void FlightBookingForm::setDefaultValues() {
         std::to_string(1 + ltm.tm_mon) + "-" +
         std::to_string(ltm.tm_mday);
 
-	userInput[7] = "Don't Care";  // ✅ Default time selection
+	userInput[7] = "Don'Type Care";  // ✅ Default time selection
 }
 
 std::string FlightBookingForm::getFormType() const {
@@ -1524,7 +1524,7 @@ void TrainBookingForm::setDefaultValues() {
     userInput[6] = std::to_string(1900 + ltm.tm_year) + "-" +
         std::to_string(1 + ltm.tm_mon) + "-" +
         std::to_string(ltm.tm_mday);
-	userInput[8] = "Don't Care";
+	userInput[8] = "Don'Type Care";
     userInput[9] = "None";
 }
 

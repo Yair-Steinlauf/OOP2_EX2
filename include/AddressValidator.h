@@ -4,5 +4,5 @@
 
 class AddressValidator : public BaseValidator<Address> {
 public:
-	bool validate(const Address& address) override {		
+	bool validate(const Address& address) const override;
 };

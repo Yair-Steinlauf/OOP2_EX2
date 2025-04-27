@@ -12,6 +12,7 @@
 #include "NameValidator.h"
 
 
+
 class DialogueManager;
 
 struct PersonalInfo {
@@ -27,7 +28,7 @@ protected:
     std::vector<std::unique_ptr<BaseField>> m_inputFields;
     std::vector<std::string> fieldLabels;
     std::vector<std::string> userInput;
-    std::size_t activeField = 0;
+    std::size_t activeField = -1;
     sf::Clock cursorTimer;
     bool showCursor = true;
 

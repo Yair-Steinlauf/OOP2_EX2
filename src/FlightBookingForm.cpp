@@ -22,7 +22,7 @@ void FlightBookingForm::setDefaultValues() {
         std::to_string(1 + ltm.tm_mon) + "-" +
         std::to_string(ltm.tm_mday);
 
-	userInput[7] = "Don't Care";  // ✅ Default time selection
+	userInput[7] = "Don'Type Care";  // ✅ Default time selection
 }
 
 std::string FlightBookingForm::getFormType() const {

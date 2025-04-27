@@ -22,7 +22,7 @@ void TrainBookingForm::setDefaultValues() {
     userInput[6] = std::to_string(1900 + ltm.tm_year) + "-" +
         std::to_string(1 + ltm.tm_mon) + "-" +
         std::to_string(ltm.tm_mday);
-	userInput[8] = "Don't Care";
+	userInput[8] = "Don'Type Care";
     userInput[9] = "None";
 }
 

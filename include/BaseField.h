@@ -8,9 +8,17 @@ class BaseField{
 protected:
 	Text m_text;
 	sf::RectangleShape m_rect;
-	bool isClicked = false;
+	bool m_isClicked = false;
+	
+
 public:
 	BaseField(sf::Vector2f location);
 	void setLocation(sf::Vector2f newLocation);
-	virtual void draw(sf::RenderWindow& window) = 0;
+	void handleInput(sf::Event event);
+	bool contains(sf::Vector2f location);
+	virtual void draw(sf::RenderWindow& window);
+	void onPressClick();
+	void onReleaseClick();
+
+
 };

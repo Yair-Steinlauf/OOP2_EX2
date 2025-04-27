@@ -2,16 +2,27 @@
 #include "DialogueManager.h"
 #include <iostream>
 #include <ctime>  // For getting current date
+#include "AddressValidator.h"
+#include "IDValidator.h"
+#include "EmailValidator.h"
+#include "DateValidator.h"
+
 
 BookingForm::BookingForm(sf::RenderWindow& win, DialogueManager* manager) :window(win), formManager(manager) {
     fieldLabels = { "Name:", "ID:", "Address:", "Email:" };
-    //TODO להוסיף כפתורים
+    //TODO להוסיף כפתורים        
+    m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
+    m_inputFields.push_back(std::make_unique<Field<IDValidator, uint32_t>>(0));
+    m_inputFields.push_back(std::make_unique<Field<AddressValidator, Address>>(Address()));
+    m_inputFields.push_back(std::make_unique<Field<EmailValidator, std::string>>(""));
+    
     int yOffset = 60;
     for (std::size_t i = 0; i < fieldLabels.size(); ++i) {
-        m_textFields.push_back(Text(fieldLabels[i],sf::Vector2f(20, yOffset)));
+        m_textFields.push_back(Text(fieldLabels[i], sf::Vector2f(20, yOffset)));
+        m_inputFields[i].get()->setLocation(sf::Vector2f(250, yOffset));
         yOffset += 50;
     }
-    m_inputFields.push_back(std::make_unique<Field<std::string>>("" , NameValidator()));
+    
 }
 
 void BookingForm::openConfirmationWindow() {

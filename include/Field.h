@@ -2,24 +2,19 @@
 #include "BaseField.h"
 #include "BaseValidator.h"
 class NameValidator;
-template<typename T>
+
+
+template<typename Validator, typename Type>
 class Field : public BaseField {
 private:
-	T m_data;
-	BaseValidator<T>* m_validator;
+	Type m_data;
 public:
-	Field(T& data, BaseValidator<T>* validator) {
+	Field(Type data , sf::Vector2f location = sf::Vector2f(0, 0))
+	: BaseField(location){
 		m_data = data;
 	}
-	//default validator
-	bool validate() {
-		m_validator->validate(m_data);
-	}
-	void draw(sf::RenderWindow& window) override;
+
+
+
 };
 
-template<typename T>
-inline void Field<T>::draw(sf::RenderWindow& window)
-{
-	m_data.draw(window);
-}

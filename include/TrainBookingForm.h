@@ -16,7 +16,7 @@ private:
             std::make_pair("Noon", false),
             std::make_pair("Evening", false),
             std::make_pair("Night", false),
-            std::make_pair("Don't Care", true)  // ✅ Default selection
+            std::make_pair("Don'Type Care", true)  // ✅ Default selection
     };
     std::array<std::pair<std::string, bool>, 4> specialSelection = {
         std::make_pair("Quiet Zone", false),
