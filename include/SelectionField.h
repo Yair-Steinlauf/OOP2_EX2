@@ -5,6 +5,7 @@
 #include "SelectionButton.h"
 #include "vector"
 #include "memory"
+
 class SelectionField {
 private:
 	std::unique_ptr<BaseField> m_field;
@@ -12,6 +13,7 @@ private:
 public:
 	SelectionField(std::unique_ptr<BaseField> field , std::vector<std::unique_ptr<SelectionButton>> buttons);
 	SelectionField();
+	std::string getString();
 	void update(const sf::Time& time);
 	bool contains(sf::Vector2f& coords);
 	void draw(sf::RenderWindow& window);

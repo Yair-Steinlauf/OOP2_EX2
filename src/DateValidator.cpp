@@ -1,6 +1,6 @@
 #include "DateValidator.h"
 
-bool DateValidator::validate(const Date& date) const
+bool DateValidator::validate(const Date& date)
 {
 	int day = date.getDay();
 	int month = date.getMonth();
@@ -20,4 +20,9 @@ bool DateValidator::validate(const Date& date) const
         return true;
     }
     return false;
+}
+
+std::string DateValidator::getError()
+{
+    return "This day is not correct or exist ??";
 }

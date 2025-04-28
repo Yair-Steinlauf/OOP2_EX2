@@ -1,6 +1,8 @@
 #include "IDValidator.h"
 
-bool IDValidator::validate(const uint32_t& fieldToValidate) const
+
+
+bool IDValidator::validate(const uint32_t& fieldToValidate)
 {
     int sum = 0, incNum;
     uint32_t numArr[9] = { 0 };
@@ -22,10 +24,15 @@ bool IDValidator::validate(const uint32_t& fieldToValidate) const
         incNum = numArr[i] * ((i % 2) + 1);
         sum += (incNum > 9) ? incNum - 9 : incNum;
     }
-	if (sum % 10 == 0) {
-		return true;
-	}
+    if (sum % 10 == 0) {
+        return true;
+    }
 
-	return false;
+    return false;
 
+}
+
+std::string IDValidator::getError()
+{
+    return "Not valid ID";
 }

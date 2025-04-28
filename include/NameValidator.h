@@ -1,8 +1,8 @@
 #pragma once
-#include <BaseValidator.h>
+#include <string>
 
-
-class NameValidator : public BaseValidator<std::string> {
+class NameValidator  {
 public:
-	bool validate(const std::string& name) const override;
+	static bool validate(const std::string& name);
+	static std::string getError();
 };

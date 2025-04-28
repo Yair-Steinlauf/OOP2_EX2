@@ -1,7 +1,8 @@
 #pragma once
-#include "BaseValidator.h"
-class EmailValidator : public BaseValidator<std::string> {
+#include "string"
+class EmailValidator {
 public:
-	bool validate(const std::string& email) const override;
+	static bool validate(const std::string& email) ;
+	static std::string getError();
 
 };

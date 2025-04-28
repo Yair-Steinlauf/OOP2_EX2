@@ -1,7 +1,10 @@
 #pragma once
-#include "BaseValidator.h"`
-class IDValidator : public BaseValidator<uint32_t>
+#include "string"
+class IDValidator
 {
 public:
-	bool validate(const uint32_t& fieldToValidate) const override;
+	static bool validate(const uint32_t& fieldToValidate);
+	static std::string getError();
+
+	
 };

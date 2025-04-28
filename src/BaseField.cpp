@@ -1,5 +1,5 @@
 #include "BaseField.h"
-
+#include "string"
 BaseField::BaseField(sf::Vector2f location)
     :m_text(Text("",location))
 {
@@ -20,14 +20,12 @@ void BaseField::setLocation(sf::Vector2f newLocation)
 void BaseField::handleInput(sf::Event event)
 {
     
-    if (event.type == sf::Event::TextEntered) {
-        std::cout << "is here";
+    if (event.type == sf::Event::TextEntered) {        
         std::string text = m_text.getText().getString();
         if (event.text.unicode == '\b' && !m_text.getText().getString().isEmpty() ) {            
             text.resize(text.size() - 1);
         }
-        else if (event.text.unicode >= 32 && event.text.unicode < 128) {
-            std::cout << "got: " << static_cast<char>(event.text.unicode);
+        else if (event.text.unicode >= 32 && event.text.unicode < 128) {            
             text += static_cast<char>(event.text.unicode);
         }
         m_text.setText(text);
@@ -66,3 +64,9 @@ void BaseField::setText(const std::string text)
 {
     m_text.setText(text);
 }
+
+std::string BaseField::getText()
+{
+    return std::string(m_text.getString());
+}
+

@@ -24,11 +24,12 @@ struct PersonalInfo {
 
 class BookingForm {
 protected:
+
 	std::vector<Text> m_textFields;
     std::vector<std::unique_ptr<BaseField>> m_inputFields;
     std::vector<std::string> fieldLabels;
     std::vector<std::string> userInput;
-    std::size_t activeField = -1;
+    std::size_t activeField = 0;
     sf::Clock cursorTimer;
     bool showCursor = true;
 
@@ -38,6 +39,7 @@ protected:
 
     virtual void setDefaultValues()=0 ;
     void openConfirmationWindow();
+    virtual std::vector<std::string> validate();
 
 public:
     BookingForm(sf::RenderWindow& win, DialogueManager* manager);

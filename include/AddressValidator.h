@@ -1,8 +1,9 @@
 #pragma once
-#include "BaseValidator.h"
+
 #include "Address.h"
 
-class AddressValidator : public BaseValidator<Address> {
+class AddressValidator {
 public:
-	bool validate(const Address& address) const override;
+	static bool validate(const Address& address);
+	static std::string getError();
 };

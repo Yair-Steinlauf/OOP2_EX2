@@ -1,7 +1,17 @@
 ﻿#include "CarRentalForm.h"
 #include "DialogueManager.h"
+#include "ConfimationWindow.h"
 #include <iostream>
 #include <ctime>  // For getting current date
+#include "IDValidator.h"
+#include "Address.h"
+#include "AddressValidator.h"
+#include "EmailValidator.h"
+#include "RentTotalDayValidator.h"
+#include "YesNoValidator.h"
+#include "CarAndGpsValidator.h"
+#include "DateValidator.h"
+
 
 CarRentalForm::CarRentalForm(sf::RenderWindow& win, DialogueManager* manager)
     : BookingForm(win, manager) {  // ✅ Calls base constructor
@@ -11,52 +21,58 @@ CarRentalForm::CarRentalForm(sf::RenderWindow& win, DialogueManager* manager)
         "GPS needed?", "Child Seat needed?",
         "Car Type:"
         });
-
-    // add field:
-
-    m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
-    m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
-    m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
-    m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
-    m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
-    m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
     
-    std::vector<std::unique_ptr<SelectionButton>> selectionButton;
-    
-
-
+    createFields();
+    std::vector<std::unique_ptr<SelectionButton>> selectionButton;    
 
     int yOffset = 60 + 50 * m_textFields.size();
+    createTextFieldsAndSetFieldLocation(yOffset);
+   yOffset -= 10;
+
+   createPickButton(selectionButton, yOffset);
+
+   int buttonY = yOffset + 40;
+   createConfirmationBtn(buttonY);
+
+  }
+
+void CarRentalForm::createConfirmationBtn(int buttonY)
+{
+    m_Done = ConfirmationBtn("Done", sf::Vector2f(20, buttonY), sf::Color(50, 150, 50));
+    m_Cancel = ConfirmationBtn("Cancel", sf::Vector2f(200, buttonY), sf::Color(180, 0, 0));
+}
+
+void CarRentalForm::createPickButton(std::vector<std::unique_ptr<SelectionButton>>& selectionButton, int yOffset)
+{
+    float carTypeButtonX = 20;
+    for (int i = 0; i < carTypeSelection.size(); ++i) {
+        selectionButton.push_back(std::make_unique<SelectionButton>(carTypeSelection[i], sf::Vector2f(carTypeButtonX, yOffset)));
+        carTypeButtonX += 105;  // ✅ Increased spacing
+
+    }
+    auto field = std::move(m_inputFields.back());
+    m_inputFields.pop_back();
+    m_selectionField = SelectionField(std::move(field), std::move(selectionButton));
+}
+
+void CarRentalForm::createTextFieldsAndSetFieldLocation(int& yOffset)
+{
     for (int i = m_textFields.size(); i < fieldLabels.size(); i++) {
         m_textFields.push_back((Text(fieldLabels[i], sf::Vector2f(20, yOffset))));
         m_inputFields[i].get()->setLocation(sf::Vector2f(250, yOffset));
         yOffset += 50;
     }
+}
 
-
-   yOffset -= 10;
-   float carTypeButtonX = 20;
-   for (int i = 0; i < carTypeSelection.size(); ++i) {
-       selectionButton.push_back(std::make_unique<SelectionButton>(carTypeSelection[i], sf::Vector2f(carTypeButtonX, yOffset)));
-       carTypeButtonX += 105;  // ✅ Increased spacing
-
-   }
-   auto field = std::move(m_inputFields.back());
-   m_inputFields.pop_back();
-   m_selectionField = SelectionField(std::move(field), std::move(selectionButton));
-
-   //    sf::RectangleShape roomButton(sf::Vector2f(90, 30));
-   //    roomButton.setPosition(carTypeButtonX, yOffset);
-   //    roomButton.setFillColor(selectedCarType == i ? sf::Color(0, 120, 255) : sf::Color::White);  // ✅ Highlight selected
-   //    roomButton.setOutlineThickness(2);
-   //    roomButton.setOutlineColor(sf::Color(160, 160, 160));
-   //    window.draw(roomButton);
-
-   //    sf::Text roomText(carTypeSelection[i], font, 16);
-   //    roomText.setFillColor(selectedCarType == i ? sf::Color::White : sf::Color::Black);
-   //    roomText.setPosition(carTypeButtonX+10, yOffset + 5);
-   //    window.draw(roomText);
-  }
+void CarRentalForm::createFields()
+{
+    m_inputFields.push_back(std::make_unique<Field<AddressValidator, Address>>(Address())); // pickup location
+    m_inputFields.push_back(std::make_unique<Field<DateValidator, Date>>(Date())); // pickup location
+    m_inputFields.push_back(std::make_unique<Field<RentTotalDayValidator, int>>(0)); // rent total days
+    m_inputFields.push_back(std::make_unique<Field<YesNoValidator, std::string>>("")); // gps needed
+    m_inputFields.push_back(std::make_unique<Field<YesNoValidator, std::string>>("")); // child seat
+    m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>("")); // car type
+}
 
 
 
@@ -98,73 +114,15 @@ void CarRentalForm::render(sf::RenderWindow& window) {
     }
     m_selectionField.draw(window);
     m_selectionField.update(cursorTimer.getElapsedTime());
+
+    m_Done.draw(window);
+    m_Cancel.draw(window);
     // ✅ Render input fields dynamically
    int yOffset = 60;
    for (std::size_t i = 0; i < fieldLabels.size(); ++i) {
-        /*sf::Text label(fieldLabels[i], font, 18);
-        label.setFillColor(sf::Color(60, 60, 60));
-        label.setPosition(20, yOffset);
-        window.draw(label);
-
-        sf::RectangleShape inputBox(sf::Vector2f(250, 35));
-        inputBox.setPosition(250, yOffset - 5);
-        inputBox.setFillColor(sf::Color::White);
-        inputBox.setOutlineThickness(2);
-        inputBox.setOutlineColor(i == activeField ? sf::Color(0, 120, 255) : sf::Color(160, 160, 160));
-        window.draw(inputBox);
-
-        std::string displayText = userInput[i];
-        if (i == activeField && cursorVisible) {
-            displayText += "|";
-        }
-
-        sf::Text inputText(displayText, font, 16);
-        inputText.setFillColor(sf::Color::Black);
-        inputText.setPosition(255, yOffset);
-        window.draw(inputText);*/
-
         yOffset += 50;
     }
-    //yOffset -= 10;
-    //float carTypeButtonX = 20;
-    //for (int i = 0; i < carTypeSelection.size(); ++i) {
-    //    sf::RectangleShape roomButton(sf::Vector2f(90, 30));
-    //    roomButton.setPosition(carTypeButtonX, yOffset);
-    //    roomButton.setFillColor(selectedCarType == i ? sf::Color(0, 120, 255) : sf::Color::White);  // ✅ Highlight selected
-    //    roomButton.setOutlineThickness(2);
-    //    roomButton.setOutlineColor(sf::Color(160, 160, 160));
-    //    window.draw(roomButton);
-
-    //    sf::Text roomText(carTypeSelection[i], font, 16);
-    //    roomText.setFillColor(selectedCarType == i ? sf::Color::White : sf::Color::Black);
-    //    roomText.setPosition(carTypeButtonX+10, yOffset + 5);
-    //    window.draw(roomText);
-
-    //    carTypeButtonX += 105;  // ✅ Increased spacing
-    //}
-    //// ✅ "Done" and "Cancel" Buttons (positioned dynamically)
-    //int buttonY = yOffset + 40;
-
-    //sf::RectangleShape submitButton(sf::Vector2f(140, 40));
-    //submitButton.setPosition(20, buttonY);
-    //submitButton.setFillColor(sf::Color(50, 150, 50));
-    //window.draw(submitButton);
-
-    //sf::Text submitText("DONE", font, 20);
-    //submitText.setFillColor(sf::Color::White);
-    //submitText.setPosition(50, buttonY + 10);
-    //window.draw(submitText);
-
-    //sf::RectangleShape cancelButton(sf::Vector2f(140, 40));
-    //cancelButton.setPosition(200, buttonY);
-    //cancelButton.setFillColor(sf::Color(180, 0, 0));
-    //window.draw(cancelButton);
-
-    //sf::Text cancelText("CANCEL", font, 20);
-    //cancelText.setFillColor(sf::Color::White);
-    //cancelText.setPosition(230, buttonY + 10);
-    //window.draw(cancelText);
-   
+  
 }
 
 void CarRentalForm::handleInput(sf::Event event) {
@@ -182,72 +140,49 @@ void CarRentalForm::handleInput(sf::Event event) {
         if (m_selectionField.contains(mousePos))
             m_selectionField.handleEvent(event);
 
+        if (m_Cancel.contains(mousePos))
+            window.close();
+        if (m_Done.contains(mousePos)) {
+            std::vector<std::string> errors = this->validate();
+            std::vector<std::string> speicalErrors = this->multiFieldValidate();
+            std::vector<std::string> userInputs;
+            for (auto& input : m_inputFields)
+            {
+                userInputs.push_back(input.get()->getText());
+            }
+            userInputs.push_back(m_selectionField.getString());
+            errors.push_back(""); // not error option in last field
+            auto confirmationWindow = ConfimationWindow("Car Rental", fieldLabels, userInputs, errors,  speicalErrors);
+            confirmationWindow.render();
+        }
+
+
     }
     if (event.type == sf::Event::TextEntered) {
         m_inputFields[activeField].get()->handleInput(event);
     }
 
-    // TODO: אם מישהו נלחץ לשנות את שאר הצבעים בחזרה לרגיל.
+}
 
+std::vector<std::string> CarRentalForm::validate()
+{
+    std::vector<std::string> errors;
+    for (auto& field : m_inputFields) {
+        errors.push_back(field.get()->getError());
+    }
+    return errors;
+}
 
-   /* if (event.type == sf::Event::TextEntered) {
-        if (event.text.unicode == '\b' && !userInput[activeField].empty()) {
-            userInput[activeField].pop_back();
-        }
-        else if (event.text.unicode >= 32 && event.text.unicode < 128) {
-            userInput[activeField] += static_cast<char>(event.text.unicode);
-        }
-    }*/
-   /* else if (event.type == sf::Event::KeyPressed) {
-        if (event.key.code == sf::Keyboard::Tab) {
-            activeField = (activeField + 1) % userInput.size();
-        }
-        if (event.key.code == sf::Keyboard::Return) {
-            std::cout << "Entered Data: ";
-            for (const auto& field : userInput) std::cout << field << " ";
-            std::cout << std::endl;
-        }
-    }*/
-    //else if (event.type == sf::Event::MouseButtonPressed) {
-    //    sf::Vector2f mousePos(event.mouseButton.x, event.mouseButton.y);
-    //    int yOffset = 60;
-
-    //    for (std::size_t i = 0; i < fieldLabels.size(); ++i) {
-    //        sf::FloatRect inputBoxBounds(240, yOffset - 5, 250, 35);
-    //        if (inputBoxBounds.contains(mousePos)) {
-    //            activeField = i;
-    //            return;
-    //        }
-    //        yOffset += 50;
-    //    }
-    //    yOffset -= 10;
-    //    // ✅ Handle Car Type Button Click          
-    //    float carTypeButtonX = 20;
-    //    for (int i = 0; i < carTypeSelection.size(); ++i) {
-    //        sf::FloatRect timeButtonBounds(carTypeButtonX, yOffset, 90, 30);
-    //        if (timeButtonBounds.contains(mousePos)) {
-    //            selectedCarType = i;
-    //            //Update the "Car Type" input box
-    //            userInput[9] = carTypeSelection[i];
-
-    //            return;
-    //        }
-    //        carTypeButtonX += 105;  // Move to next button
-    //    }
-    //     yOffset += 40;
-
-        /*if (mousePos.x >= 20 && mousePos.x <= 160 && mousePos.y >= yOffset && mousePos.y <= yOffset + 40) {
-            std::cout << "Car Rental Confirmed!\n";
-            openConfirmationWindow();
-            return;
-        }
-
-        if (mousePos.x >= 200 && mousePos.x <= 340 && mousePos.y >= yOffset && mousePos.y <= yOffset + 40) {
-            std::cout << "Cancelled Car Rental\n";
-            formManager->closeForm();
-            return;
-        }*/
-    //}
+std::vector<std::string> CarRentalForm::multiFieldValidate()
+{
+    std::vector<std::string> errorList;
+    std::vector<std::string> data;
+    data.push_back(m_inputFields[7].get()->getText());
+    data.push_back(m_selectionField.getString());
+    bool isCarGpsValid = CarAndGpsValidator::validate(data);
+    
+    isCarGpsValid ? errorList.push_back("") : errorList.push_back(CarAndGpsValidator::getError());
+    return errorList;
 }
 
 

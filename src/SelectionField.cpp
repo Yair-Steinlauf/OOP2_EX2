@@ -1,5 +1,5 @@
 #include "SelectionField.h"
-
+#include "NameValidator.h"
 
 SelectionField::SelectionField(std::unique_ptr<BaseField> field, std::vector<std::unique_ptr<SelectionButton>> buttons)
 	:m_buttons(std::move(buttons))
@@ -8,8 +8,13 @@ SelectionField::SelectionField(std::unique_ptr<BaseField> field, std::vector<std
 }
 
 SelectionField::SelectionField()
-	: m_field(std::make_unique<Field<NameValidator, std::string>>("")), m_buttons()
+	: m_field(std::make_unique<Field<NameValidator, std::string>>()), m_buttons()
 {
+}
+
+std::string SelectionField::getString()
+{
+	return m_field.get()->getText();
 }
 
 void SelectionField::update(const sf::Time& time)

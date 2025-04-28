@@ -44,11 +44,23 @@ bool Date::operator!=(const Date& other) const
 {
 	return !(*this == other);
 }
-//std::istream& operator>>(std::istream& is, Date& date)
-//{
-//	is >> m_day >> m_month >> m_year;
-//	return is;
-//}
+std::istream& operator>>(std::istream& is, Date& date)
+{
+	int day, month, year;
+	char sep1, sep2;
+
+	
+	if (is >> day >> sep1 >> month >> sep2 >> year)
+	{
+		if (sep1 == '-' && sep2 == '-') {
+			date = Date(day, month, year); 
+		}
+		else {
+			is.setstate(std::ios::failbit); 
+		}
+	}
+	return is;
+}
 std::ostream& operator<<(std::ostream& os, const Date& date)
 {
 	os << date.getDay() << "/" << date.getMonth() << "/" << date.getYear();

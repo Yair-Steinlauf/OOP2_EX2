@@ -2,38 +2,93 @@
 HEADER FILES (.h) FROM INCLUDE DIRECTORY
 ==================================================
 
+File: Address.h
+--------------------------------------------------
+#pragma once
+#include <iostream>
+class Address {
+private:
+	std::string m_street , m_city;
+	int m_number;
+public:
+	// Getters
+	std::string getCity() const;
+	std::string getStreet() const;
+	int getNumber() const;
+
+
+	Address(std::string street = "", std::string city = "", int number = 0);
+	Address(const Address& other);
+	Address& operator=(const Address& other);
+	bool operator==(const Address& other) const;
+	bool operator!=(const Address& other) const;
+	~Address() = default;
+};
+ std::istream& operator>>(std::istream& is, Address& address);
+ std::ostream& operator<<(std::ostream& os, const Address& address);
+
+File: AddressValidator.h
+--------------------------------------------------
+#pragma once
+
+#include "Address.h"
+
+class AddressValidator {
+public:
+	static bool validate(const Address& address);
+	static std::string getError();
+};
+
 File: BaseField.h
 --------------------------------------------------
 #pragma once
 #include "SFML/Graphics.hpp"
-
+#include "Text.h"
 
 
 
 class BaseField{
 protected:
-	sf::Text m_text;
-
-	bool isClicked = false;
-public:
-	BaseField();
+	Text m_text;
+	sf::RectangleShape m_rect;
+	bool m_isClicked = false;
 	
+
+public:
+	BaseField(sf::Vector2f location = sf::Vector2f(0,0));
+	void setLocation(sf::Vector2f newLocation);
+	void handleInput(sf::Event event);
+	bool contains(sf::Vector2f location);
+	virtual void draw(sf::RenderWindow& window);
+	void onPressClick();
+	void onReleaseClick();
+	void setText(const std::string text);
+	virtual ~BaseField() = default;
+
+
 };
 
 
 File: BaseValidator.h
 --------------------------------------------------
 #pragma once
+#include <string>
+
+class AddressValidator;
+class IDValidator;
+class EmailValidator;
+class DateValidator;
 
 template <typename Type>
+
+
 class BaseValidator {
 public:
-	virtual bool validate(std::string text) = 0;
-};
-
-class NameValidator : public BaseValidator<Name>{
-public:
-	bool validate(std::string text) override;
+	static virtual bool validate(const Type& object) {
+		return false;
+	}
+	virtual ~BaseValidator() = default;
+	static virtual std::string getError() { return ""; }
 };
 
 
@@ -47,6 +102,14 @@ File: BookingForm.h
 #include <vector>
 #include <string>
 #include <array>
+#include <Text.h>
+#include <DataLoader.h>
+#include <memory>
+#include <Field.h>
+#include "NameValidator.h"
+
+
+
 class DialogueManager;
 
 struct PersonalInfo {
@@ -58,9 +121,11 @@ struct PersonalInfo {
 
 class BookingForm {
 protected:
+	std::vector<Text> m_textFields;
+    std::vector<std::unique_ptr<BaseField>> m_inputFields;
     std::vector<std::string> fieldLabels;
     std::vector<std::string> userInput;
-    std::size_t activeField = 0;
+    std::size_t activeField = -1;
     sf::Clock cursorTimer;
     bool showCursor = true;
 
@@ -70,6 +135,7 @@ protected:
 
     virtual void setDefaultValues()=0 ;
     void openConfirmationWindow();
+    virtual std::vector<std::string> validate() = 0;
 
 public:
     BookingForm(sf::RenderWindow& win, DialogueManager* manager);
@@ -87,13 +153,21 @@ File: Button.h
 #pragma once
 #include "Text.h"
 
-class Button : public Text {
-private:
+class Button{
+protected:
+	Text m_text;
 	sf::RectangleShape m_rectangle;
+	bool m_isClicked = false;
 public:
-	Button(Text& text, sf::Vector2f size, sf::Color fillColor, sf::Vector2f location);
-
+	Button(const Text& text = Text());
+	virtual bool contains(sf::Vector2f& coords);
+	void draw(sf::RenderWindow& window);
+	virtual void onClick() = 0;
+	virtual void update() = 0;
+	~Button() = default;
 };
+
+
 
 File: CarRentalForm.h
 --------------------------------------------------
@@ -103,21 +177,91 @@ File: CarRentalForm.h
 
 #include "BookingForm.h"
 #include <array>
+#include <vector>
+#include "SelectionField.h"
+#include "ConfirmationBtn.h"
+
 class CarRentalForm : public BookingForm {
-    std::string pickupLocation, dropOffLocation, carType;
 public:
     CarRentalForm(sf::RenderWindow& win, DialogueManager* manager);    
     std::string getFormType() const override;
     void render(sf::RenderWindow& window) override;
     void handleInput(sf::Event event) override;
 private:
+    std::vector<std::string> validate() override;
+    std::string pickupLocation, dropOffLocation, carType;
     void setDefaultValues();
     std::array<std::string, 5> carTypeSelection = { "Economy","Compact","Sedan","SUV","Luxury"};
     int selectedCarType = 0;
+    SelectionField m_selectionField;
+    ConfirmationBtn m_Done;
+    ConfirmationBtn m_Cancel;
 };
 
 #endif // CARRENTALFORM_H
 
+
+File: ConfimationWindow.h
+--------------------------------------------------
+#pragma once
+#include "BookingForm.h"
+#include "ConfirmationBtn.h"
+
+
+
+
+class ConfimationWindow {
+public:
+    ConfimationWindow(std::string title,
+        const std::vector<std::string>& texts,
+        const std::vector<std::string>& fields,
+        const std::vector<std::string>& errors,
+        const std::vector<std::string>& specialErrors
+    );
+    void render();
+
+private:   
+    std::string formTitle;
+    std::vector<Text> m_texts;
+    ConfirmationBtn m_approve;
+    ConfirmationBtn m_cancel;
+    bool approved = true;
+};
+
+File: ConfirmationBtn.h
+--------------------------------------------------
+#pragma once
+#include "Button.h"
+
+class ConfirmationBtn : public Button
+{
+public:
+	ConfirmationBtn(std::string text = "Done", sf::Vector2f location = sf::Vector2f(0, 0), sf::Color color = sf::Color(50, 150, 50));
+	~ConfirmationBtn() = default;
+	void update() override;
+	void onClick() override;
+private:
+
+};
+
+
+File: DataLoader.h
+--------------------------------------------------
+#pragma once
+#include "SFML/Graphics.hpp"
+
+class DataLoader
+{
+public:
+    static DataLoader& Init();
+    DataLoader(const DataLoader&) = delete;
+    void operator=(const DataLoader&) = delete;
+    static sf::Font& getP2Font();
+
+private:
+    DataLoader();
+    sf::Font m_font;
+};
 
 File: DatabaseManager.h
 --------------------------------------------------
@@ -136,6 +280,39 @@ public:
 
 #endif // DATABASEMANAGER_H
 
+
+File: Date.h
+--------------------------------------------------
+#pragma once
+#include <iostream>
+class Date {
+private:
+	int m_day, m_month, m_year;
+public:
+	Date(int day = 1, int month = 1, int year = 2000);
+	Date(const Date& other);
+	int getDay() const;
+	int getMonth() const;
+	int getYear() const;
+	Date& operator=(const Date& other);	
+	bool operator==(const Date& other) const;	
+	bool operator!=(const Date& other) const;
+	~Date() = default;
+};
+
+std::istream& operator>>(std::istream& is, Date& date);
+std::ostream& operator<<(std::ostream& os, const Date& date); 
+
+File: DateValidator.h
+--------------------------------------------------
+#pragma once
+#include "Date.h"
+#include "BaseValidator.h"
+
+class DateValidator : public BaseValidator<Date> {
+public:
+	bool validate(const Date& date) const;
+};
 
 File: DialogueManager.h
 --------------------------------------------------
@@ -162,6 +339,17 @@ public:
 
 #endif // DIALOGUEMANAGER_H
 
+
+File: EmailValidator.h
+--------------------------------------------------
+#pragma once
+
+class EmailValidator {
+public:
+	static bool validate(const std::string& email) ;
+	static std::string getError();
+
+};
 
 File: Engine.h
 --------------------------------------------------
@@ -213,43 +401,30 @@ File: Field.h
 #pragma once
 #include "BaseField.h"
 #include "BaseValidator.h"
-template<typename Type>
+
+
+
+template<typename Validator, typename Type>
 class Field : public BaseField {
 private:
 	Type m_data;
-	BaseValidator<Type> m_validator;
+	Validator m_validator;
 public:
-	Field(Type& data) {
+	Field(Type data , sf::Vector2f location = sf::Vector2f(0, 0))
+	: BaseField(location){
 		m_data = data;
 	}
-	//default validator
-	bool validate() {
-		return true;
-	}
-};
-struct Name {
-	std::string name;
+
+	std::string getError();
 };
 
-struct Date {};
-template<>
-bool Field<Name>::validate() {
-	for (int index = 0; index < m_data.name.length(); index++)
-		if (isdigit(m_data.name[index])) return false;
-	return true;
+template<typename Validator, typename Type>
+inline std::string Field<Validator, Type>::getError()
+{
+	if (Validator::validate(m_data))
+		return "";
+	return Validator::getError();
 }
-
-template<>
-bool Field<Date>::validate() {
-
-}
-//bool validor<Date>() {
-//	//date validation;
-//}
-//bool validor<std::string>() {
-//	//no number validation;
-//}
-
 
 
 File: FlightBookingForm.h
@@ -304,6 +479,19 @@ private:
 #endif // HOTELBOOKINGFORM_H
 
 
+File: IDValidator.h
+--------------------------------------------------
+#pragma once
+#include "string"
+class IDValidator
+{
+public:
+	static bool validate(const uint32_t& fieldToValidate);
+	static std::string getError();
+
+	
+};
+
 File: Logger.h
 --------------------------------------------------
 #pragma once
@@ -335,19 +523,17 @@ public:
 
 #endif // LOGGER_H
 
-File: MainObject.h
+File: NameValidator.h
 --------------------------------------------------
 #pragma once
-#include <SFML/Graphics.hpp>
-class MainObject {
-protected:
-	sf::Text m_text;
-	MainObject(std::string text = "", sf::Color color = sf::Color::Black, sf::Text::Style style = sf::Text::Bold
-		, unsigned int characterSize = 24, sf::Font font = sf::Font(),
-		sf::Vector2f location = sf::Vector2f(0,0));
+#include <string>
+
+class NameValidator  {
 public:
-	virtual void draw(sf::RenderWindow& window);
+	static bool validate(const std::string& name);
+	static std::string getError();
 };
+
 
 File: NotificationSystem.h
 --------------------------------------------------
@@ -365,19 +551,68 @@ public:
 #endif // NOTIFICATIONSYSTEM_H
 
 
+File: SelectionButton.h
+--------------------------------------------------
+#pragma once
+#include "Button.h"
+
+class SelectionButton : public Button
+{
+public:
+	SelectionButton(const std::string& text, sf::Vector2f location);
+	void setClick(bool input) ;
+	~SelectionButton() = default;
+	void update();
+	void onClick();
+	std::string getText();
+private:
+
+};
+
+
+File: SelectionField.h
+--------------------------------------------------
+#pragma once
+#include "SFML/Graphics.hpp"
+#include "Text.h"
+#include "Field.h"
+#include "SelectionButton.h"
+#include "vector"
+#include "memory"
+class SelectionField {
+private:
+	std::unique_ptr<BaseField> m_field;
+	std::vector<std::unique_ptr<SelectionButton>> m_buttons;
+public:
+	SelectionField(std::unique_ptr<BaseField> field , std::vector<std::unique_ptr<SelectionButton>> buttons);
+	SelectionField();
+	void update(const sf::Time& time);
+	bool contains(sf::Vector2f& coords);
+	void draw(sf::RenderWindow& window);
+	void handleEvent(sf::Event& event);
+
+};
+
 File: Text.h
 --------------------------------------------------
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "MainObject.h"
-
-class Text : public MainObject {
+#include <string>
+#include <iostream>
+#include "DataLoader.h"
+class Text{
+private:
+	sf::Text m_text;
 public:
-	Text(std::string text = "", sf::Color color = sf::Color::Black, sf::Text::Style style = sf::Text::Bold
-		, unsigned int characterSize = 24, sf::Font font = sf::Font(),
-		sf::Vector2f location = sf::Vector2f(0, 0));
-
-	
+	Text(std::string text = "", sf::Vector2f location = sf::Vector2f(0, 0) ,
+		sf::Color color = sf::Color(60, 60, 60), sf::Text::Style style = sf::Text::Style::Regular
+		, unsigned int characterSize = 18);
+	void draw(sf::RenderWindow& window);
+	void setText(std::string text);
+	void setLocation(sf::Vector2f newLocation);
+	void setFillColor(const sf::Color& color);
+	sf::Text& getText();
+	std::string getString();
 };
 
 File: TrainBookingForm.h
@@ -448,13 +683,171 @@ public:
 SOURCE FILES (.cpp) FROM SRC DIRECTORY
 ==================================================
 
+File: Address.cpp
+--------------------------------------------------
+#include "Address.h"
+#include <string>
+
+std::string Address::getCity() const
+{
+	return m_city;
+}
+
+std::string Address::getStreet() const
+{
+	return m_street;
+}
+
+int Address::getNumber() const
+{
+	return m_number;
+}
+
+
+
+Address::Address(std::string street, std::string city, int number)
+{
+	m_street = street;
+	m_city = city;
+	m_number = number;
+}
+
+Address::Address(const Address& other)
+{
+	*this = other;
+}
+
+Address& Address::operator=(const Address& other)
+{
+	if (this != &other)
+	{
+		m_street = other.m_street;
+		m_city = other.m_city;
+		m_number = other.m_number;
+	}
+	return *this;
+}
+std::istream& operator>>(std::istream& is, Address& address)
+{
+	std::string street, city;
+	int number;
+	std::string line;
+	is >> line;
+	
+	size_t firstDash = line.find('-');
+	size_t secondDash = line.find('-', firstDash + 1);
+
+	if (firstDash != std::string::npos && secondDash != std::string::npos) {
+		street = line.substr(0, firstDash);
+		number = std::stoi(line.substr(firstDash + 1, secondDash - firstDash - 1));
+		city = line.substr(secondDash + 1);
+	}
+	address = Address(street, city, number);
+	return is;
+}
+std::ostream& operator<<(std::ostream& os, const Address& address)
+{
+	os << address.getStreet() << ", " <<  address.getNumber() << ", " << address.getCity() ;
+	return os;
+}
+bool Address::operator==(const Address& other) const
+{
+	return (m_street == other.m_street && m_city == other.m_city && m_number == other.m_number);
+}
+
+bool Address::operator!=(const Address& other) const
+{
+	return !(*this == other);
+}
+
+
+File: AddressValidator.cpp
+--------------------------------------------------
+#include "AddressValidator.h"
+#include "NameValidator.h"
+
+
+bool AddressValidator::validate(const Address& address)
+{
+	bool isCityValid = NameValidator::validate(address.getCity());
+	bool isStreetValid = NameValidator::validate(address.getStreet());
+	bool isCityValid = address.getNumber() > 0;
+	return isCityValid && isStreetValid && isCityValid;
+}
+
+std::string AddressValidator::getError()
+{
+	return "Adress not valid";
+}
+
+
 File: BaseField.cpp
 --------------------------------------------------
 #include "BaseField.h"
 
-BaseField::BaseField(Button& button) : Button(button)
+BaseField::BaseField(sf::Vector2f location)
+    :m_text(Text("",location))
 {
+    
+    m_rect.setSize(sf::Vector2f(250, 35));
+    m_rect.setPosition(location);
+    m_rect.setFillColor(sf::Color::White);
+    m_rect.setOutlineThickness(2);
+    m_rect.setOutlineColor(sf::Color(160, 160, 160));
+}
 
+void BaseField::setLocation(sf::Vector2f newLocation)
+{
+    m_rect.setPosition(newLocation);
+    m_text.setLocation(newLocation);
+}
+
+void BaseField::handleInput(sf::Event event)
+{
+    
+    if (event.type == sf::Event::TextEntered) {        
+        std::string text = m_text.getText().getString();
+        if (event.text.unicode == '\b' && !m_text.getText().getString().isEmpty() ) {            
+            text.resize(text.size() - 1);
+        }
+        else if (event.text.unicode >= 32 && event.text.unicode < 128) {            
+            text += static_cast<char>(event.text.unicode);
+        }
+        m_text.setText(text);
+    }
+
+}
+
+bool BaseField::contains(sf::Vector2f location)
+{
+    if (m_rect.getGlobalBounds().contains(location)) {
+        return true;
+    }
+    return false;
+}
+
+void BaseField::draw(sf::RenderWindow& window)
+{
+    window.draw(m_rect);
+    m_text.draw(window);
+}
+
+void BaseField::onPressClick()
+{
+    m_isClicked = true;    
+    m_rect.setOutlineColor(sf::Color(0, 120, 255));
+// TODO cursur
+}
+
+void BaseField::onReleaseClick()
+{
+    m_isClicked = false;
+    m_rect.setOutlineColor(sf::Color(160, 160, 160));
+}
+
+void BaseField::setText(const std::string text)
+{
+    m_text.setText(text);
 }
 
 
@@ -464,10 +857,27 @@ File: BookingForm.cpp
 #include "DialogueManager.h"
 #include <iostream>
 #include <ctime>  // For getting current date
+#include "AddressValidator.h"
+#include "IDValidator.h"
+#include "EmailValidator.h"
+#include "DateValidator.h"
+
 
 BookingForm::BookingForm(sf::RenderWindow& win, DialogueManager* manager) :window(win), formManager(manager) {
-    fieldLabels = { "Name:", "ID:", "Address:", "Email:" };  // ✅ Add common fields
-    userInput.resize(fieldLabels.size(), "");  // Initialize input fields
+    fieldLabels = { "Name:", "ID:", "Address:", "Email:" };
+    //TODO להוסיף כפתורים        
+    m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
+    m_inputFields.push_back(std::make_unique<Field<IDValidator, uint32_t>>(0));
+    m_inputFields.push_back(std::make_unique<Field<AddressValidator, Address>>(Address()));
+    m_inputFields.push_back(std::make_unique<Field<EmailValidator, std::string>>(""));
+    
+    int yOffset = 60;
+    for (std::size_t i = 0; i < fieldLabels.size(); ++i) {
+        m_textFields.push_back(Text(fieldLabels[i], sf::Vector2f(20, yOffset)));
+        m_inputFields[i].get()->setLocation(sf::Vector2f(250, yOffset));
+        yOffset += 50;
+    }
+    
 }
 
 void BookingForm::openConfirmationWindow() {
@@ -552,19 +962,39 @@ File: Button.cpp
 --------------------------------------------------
 #include "Button.h"
 
-Button::Button(Text& text, sf::Vector2f size, sf::Color fillColor, sf::Vector2f location) 
-	: Text(text)
-{
-	m_rectangle.setSize(size);
-	m_rectangle.setFillColor(fillColor);
-	m_rectangle.setPosition(location);
+//Button::Button(const std::string& text, 
+//	unsigned int characterSize ,sf::Vector2f size)
+//	: m_text(Text(text, location, sf::Color::White))
+//{
+//	m_rectangle.setSize(size);
+//	m_rectangle.setFillColor(fillColor);
+//	m_rectangle.setPosition(location);
+//}
 
+Button::Button(const Text& text)
+	:m_text(text)
+{
 }
+
+bool Button::contains(sf::Vector2f& coords)
+{
+	if (m_rectangle.getGlobalBounds().contains(coords))
+		return true;
+	return false;
+}
+
+void Button::draw(sf::RenderWindow& window)
+{
+	window.draw(m_rectangle);
+	m_text.draw(window);
+}
+
 
 File: CarRentalForm.cpp
 --------------------------------------------------
 ﻿#include "CarRentalForm.h"
 #include "DialogueManager.h"
+#include "ConfimationWindow.h"
 #include <iostream>
 #include <ctime>  // For getting current date
 
@@ -577,9 +1007,56 @@ CarRentalForm::CarRentalForm(sf::RenderWindow& win, DialogueManager* manager)
         "Car Type:"
         });
 
-    userInput.resize(fieldLabels.size(), "");  // ✅ Resize input fields
-    setDefaultValues();
-}
+    // add field:
+
+    m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
+    m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
+    m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
+    m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
+    m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
+    m_inputFields.push_back(std::make_unique<Field<NameValidator, std::string>>(""));
+    
+    std::vector<std::unique_ptr<SelectionButton>> selectionButton;
+    
+
+
+
+    int yOffset = 60 + 50 * m_textFields.size();
+    for (int i = m_textFields.size(); i < fieldLabels.size(); i++) {
+        m_textFields.push_back((Text(fieldLabels[i], sf::Vector2f(20, yOffset))));
+        m_inputFields[i].get()->setLocation(sf::Vector2f(250, yOffset));
+        yOffset += 50;
+    }
+
+
+   yOffset -= 10;
+   float carTypeButtonX = 20;
+   for (int i = 0; i < carTypeSelection.size(); ++i) {
+       selectionButton.push_back(std::make_unique<SelectionButton>(carTypeSelection[i], sf::Vector2f(carTypeButtonX, yOffset)));
+       carTypeButtonX += 105;  // ✅ Increased spacing
+
+   }
+   auto field = std::move(m_inputFields.back());
+   m_inputFields.pop_back();
+   m_selectionField = SelectionField(std::move(field), std::move(selectionButton));
+
+   int buttonY = yOffset + 40;
+   m_Done = ConfirmationBtn( "Done", sf::Vector2f(20, buttonY), sf::Color(50,150,50));
+   m_Cancel = ConfirmationBtn("Cancel", sf::Vector2f(200, buttonY), sf::Color(180,0,0));
+   //    sf::RectangleShape roomButton(sf::Vector2f(90, 30));
+   //    roomButton.setPosition(carTypeButtonX, yOffset);
+   //    roomButton.setFillColor(selectedCarType == i ? sf::Color(0, 120, 255) : sf::Color::White);  // ✅ Highlight selected
+   //    roomButton.setOutlineThickness(2);
+   //    roomButton.setOutlineColor(sf::Color(160, 160, 160));
+   //    window.draw(roomButton);
+
+   //    sf::Text roomText(carTypeSelection[i], font, 16);
+   //    roomText.setFillColor(selectedCarType == i ? sf::Color::White : sf::Color::Black);
+   //    roomText.setPosition(carTypeButtonX+10, yOffset + 5);
+   //    window.draw(roomText);
+  }
+
+
 
 void CarRentalForm::setDefaultValues() {
     time_t now = time(0);
@@ -611,84 +1088,65 @@ void CarRentalForm::render(sf::RenderWindow& window) {
 
     bool cursorVisible = (cursorTimer.getElapsedTime().asMilliseconds() % 1000 < 500);
 
+    for (auto& object : m_inputFields) {
+        object.get()->draw(window);
+    }
+    for (auto& object : m_textFields) {
+        object.draw(window);
+    }
+    m_selectionField.draw(window);
+    m_selectionField.update(cursorTimer.getElapsedTime());
+
+    m_Done.draw(window);
+    m_Cancel.draw(window);
     // ✅ Render input fields dynamically
-    int yOffset = 60;
-    for (std::size_t i = 0; i < fieldLabels.size(); ++i) {
-        sf::Text label(fieldLabels[i], font, 18);
-        label.setFillColor(sf::Color(60, 60, 60));
-        label.setPosition(20, yOffset);
-        window.draw(label);
-
-        sf::RectangleShape inputBox(sf::Vector2f(250, 35));
-        inputBox.setPosition(250, yOffset - 5);
-        inputBox.setFillColor(sf::Color::White);
-        inputBox.setOutlineThickness(2);
-        inputBox.setOutlineColor(i == activeField ? sf::Color(0, 120, 255) : sf::Color(160, 160, 160));
-        window.draw(inputBox);
-
-        std::string displayText = userInput[i];
-        if (i == activeField && cursorVisible) {
-            displayText += "|";
-        }
-
-        sf::Text inputText(displayText, font, 16);
-        inputText.setFillColor(sf::Color::Black);
-        inputText.setPosition(255, yOffset);
-        window.draw(inputText);
-
+   int yOffset = 60;
+   for (std::size_t i = 0; i < fieldLabels.size(); ++i) {
         yOffset += 50;
     }
-    yOffset -= 10;
-    float carTypeButtonX = 20;
-    for (int i = 0; i < carTypeSelection.size(); ++i) {
-        sf::RectangleShape roomButton(sf::Vector2f(90, 30));
-        roomButton.setPosition(carTypeButtonX, yOffset);
-        roomButton.setFillColor(selectedCarType == i ? sf::Color(0, 120, 255) : sf::Color::White);  // ✅ Highlight selected
-        roomButton.setOutlineThickness(2);
-        roomButton.setOutlineColor(sf::Color(160, 160, 160));
-        window.draw(roomButton);
-
-        sf::Text roomText(carTypeSelection[i], font, 16);
-        roomText.setFillColor(selectedCarType == i ? sf::Color::White : sf::Color::Black);
-        roomText.setPosition(carTypeButtonX+10, yOffset + 5);
-        window.draw(roomText);
-
-        carTypeButtonX += 105;  // ✅ Increased spacing
-    }
-    // ✅ "Done" and "Cancel" Buttons (positioned dynamically)
-    int buttonY = yOffset + 40;
-
-    sf::RectangleShape submitButton(sf::Vector2f(140, 40));
-    submitButton.setPosition(20, buttonY);
-    submitButton.setFillColor(sf::Color(50, 150, 50));
-    window.draw(submitButton);
-
-    sf::Text submitText("DONE", font, 20);
-    submitText.setFillColor(sf::Color::White);
-    submitText.setPosition(50, buttonY + 10);
-    window.draw(submitText);
-
-    sf::RectangleShape cancelButton(sf::Vector2f(140, 40));
-    cancelButton.setPosition(200, buttonY);
-    cancelButton.setFillColor(sf::Color(180, 0, 0));
-    window.draw(cancelButton);
-
-    sf::Text cancelText("CANCEL", font, 20);
-    cancelText.setFillColor(sf::Color::White);
-    cancelText.setPosition(230, buttonY + 10);
-    window.draw(cancelText);
+  
 }
 
 void CarRentalForm::handleInput(sf::Event event) {
+    sf::Vector2f mousePos(event.mouseButton.x, event.mouseButton.y);
+    if (event.type == sf::Event::MouseButtonPressed) {
+
+        for (int i = 0; i < m_inputFields.size(); i++)
+        {
+            m_inputFields[i].get()->onReleaseClick();
+            if (m_inputFields[i].get()->contains(mousePos)) {
+                activeField = i;
+                m_inputFields[i].get()->onPressClick();
+            }
+        }
+        if (m_selectionField.contains(mousePos))
+            m_selectionField.handleEvent(event);
+
+        if (m_Cancel.contains(mousePos))
+            window.close();
+        if (m_Done.contains(mousePos)) {
+            ConfimationWindow confirmationWindow("Confirm Car Rental", m_inputFields, );
+        }
+
+
+    }
     if (event.type == sf::Event::TextEntered) {
+        m_inputFields[activeField].get()->handleInput(event);
+    }
+
+    
+    // TODO: אם מישהו נלחץ לשנות את שאר הצבעים בחזרה לרגיל.
+
+
+   /* if (event.type == sf::Event::TextEntered) {
         if (event.text.unicode == '\b' && !userInput[activeField].empty()) {
             userInput[activeField].pop_back();
         }
         else if (event.text.unicode >= 32 && event.text.unicode < 128) {
             userInput[activeField] += static_cast<char>(event.text.unicode);
         }
-    }
-    else if (event.type == sf::Event::KeyPressed) {
+    }*/
+   /* else if (event.type == sf::Event::KeyPressed) {
         if (event.key.code == sf::Keyboard::Tab) {
             activeField = (activeField + 1) % userInput.size();
         }
@@ -697,36 +1155,36 @@ void CarRentalForm::handleInput(sf::Event event) {
             for (const auto& field : userInput) std::cout << field << " ";
             std::cout << std::endl;
         }
-    }
-    else if (event.type == sf::Event::MouseButtonPressed) {
-        sf::Vector2f mousePos(event.mouseButton.x, event.mouseButton.y);
-        int yOffset = 60;
+    }*/
+    //else if (event.type == sf::Event::MouseButtonPressed) {
+    //    sf::Vector2f mousePos(event.mouseButton.x, event.mouseButton.y);
+    //    int yOffset = 60;
 
-        for (std::size_t i = 0; i < fieldLabels.size(); ++i) {
-            sf::FloatRect inputBoxBounds(240, yOffset - 5, 250, 35);
-            if (inputBoxBounds.contains(mousePos)) {
-                activeField = i;
-                return;
-            }
-            yOffset += 50;
-        }
-        yOffset -= 10;
-        // ✅ Handle Car Type Button Click          
-        float carTypeButtonX = 20;
-        for (int i = 0; i < carTypeSelection.size(); ++i) {
-            sf::FloatRect timeButtonBounds(carTypeButtonX, yOffset, 90, 30);
-            if (timeButtonBounds.contains(mousePos)) {
-                selectedCarType = i;
-                //Update the "Car Type" input box
-                userInput[9] = carTypeSelection[i];
+    //    for (std::size_t i = 0; i < fieldLabels.size(); ++i) {
+    //        sf::FloatRect inputBoxBounds(240, yOffset - 5, 250, 35);
+    //        if (inputBoxBounds.contains(mousePos)) {
+    //            activeField = i;
+    //            return;
+    //        }
+    //        yOffset += 50;
+    //    }
+    //    yOffset -= 10;
+    //    // ✅ Handle Car Type Button Click          
+    //    float carTypeButtonX = 20;
+    //    for (int i = 0; i < carTypeSelection.size(); ++i) {
+    //        sf::FloatRect timeButtonBounds(carTypeButtonX, yOffset, 90, 30);
+    //        if (timeButtonBounds.contains(mousePos)) {
+    //            selectedCarType = i;
+    //            //Update the "Car Type" input box
+    //            userInput[9] = carTypeSelection[i];
 
-                return;
-            }
-            carTypeButtonX += 105;  // Move to next button
-        }
-         yOffset += 40;
+    //            return;
+    //        }
+    //        carTypeButtonX += 105;  // Move to next button
+    //    }
+    //     yOffset += 40;
 
-        if (mousePos.x >= 20 && mousePos.x <= 160 && mousePos.y >= yOffset && mousePos.y <= yOffset + 40) {
+        /*if (mousePos.x >= 20 && mousePos.x <= 160 && mousePos.y >= yOffset && mousePos.y <= yOffset + 40) {
             std::cout << "Car Rental Confirmed!\n";
             openConfirmationWindow();
             return;
@@ -736,11 +1194,138 @@ void CarRentalForm::handleInput(sf::Event event) {
             std::cout << "Cancelled Car Rental\n";
             formManager->closeForm();
             return;
-        }
+        }*/
+    //}
+}
+
+std::vector<std::string> CarRentalForm::validate()
+{
+    std::vector<std::string> errors;
+    for (auto& field : m_inputFields) {
+        errors.push_back(field.get().getError());
     }
+    return std::vector<std::string>();
 }
 
 
+
+
+File: ConfimationWindow.cpp
+--------------------------------------------------
+#include "ConfimationWindow.h"
+
+ConfimationWindow::ConfimationWindow(std::string formTitle,
+	const std::vector<std::string>& texts,
+	const std::vector<std::string>& fields,
+	const std::vector<std::string>& errors,
+	const std::vector<std::string>& specialErrors
+) : formTitle(formTitle)
+{
+
+	Text title("Confirm " + formTitle, sf::Vector2f(130, 20), sf::Color::Black, sf::Text::Bold, 22);
+	m_texts.push_back(title);
+	int yOffset = 80;
+	for (int i = 0; i < texts.size(); i++)
+	{
+		Text text(texts[i] + " " + fields[i], sf::Vector2f(50, yOffset), sf::Color::Black);
+		m_texts.push_back(text);
+		if (errors[i] != "") {
+			approved = false;
+			yOffset += 30;
+			Text error(errors[i], sf::Vector2f(50, yOffset), sf::Color::Red, sf::Text::Italic, 16);
+			m_texts.push_back(error);
+		}
+		yOffset += 30;
+	}
+	// check last validator:
+	Text formValidators("Form Validators:", sf::Vector2f(50, yOffset), sf::Color::Black);	
+	m_texts.push_back(formValidators);
+	yOffset += 30;
+	for (int i = 0; i < specialErrors.size(); i++)
+	{
+		approved = false;
+		Text error(specialErrors[i], sf::Vector2f(50, yOffset), sf::Color::Red, sf::Text::Italic, 16);		
+		yOffset += 30;
+	}
+	yOffset += 40;	
+	m_approve = ConfirmationBtn("APPROVE", sf::Vector2f(20, yOffset), sf::Color(50, 150, 50));
+	m_cancel = ConfirmationBtn("CANCEL", sf::Vector2f(200, yOffset), sf::Color(180, 0, 0));
+}
+
+
+void ConfimationWindow::render()
+{
+	sf::RenderWindow confirmWindow(sf::VideoMode(500, 600), "Confirm " + formTitle);
+	while (confirmWindow.isOpen()) {
+		sf::Event event;
+		while (confirmWindow.pollEvent(event)) {
+			if (event.type == sf::Event::Closed)
+				confirmWindow.close();
+			sf::Vector2f mousePos(event.mouseButton.x, event.mouseButton.y);
+			if (event.type == sf::Event::MouseButtonPressed) {
+				// cancel clicked: 
+				if (m_cancel.contains(mousePos)) {
+					confirmWindow.close();
+				}
+				if (m_approve.contains(mousePos)) {
+					if (approved)
+						std::cout << formTitle << " Confirmed! Returning to main menu." << std::endl;
+					confirmWindow.close();
+				}
+			}
+		}
+		for (auto& text : m_texts) {
+			text.draw(confirmWindow);
+		}
+		m_cancel.draw(confirmWindow);
+		m_approve.draw(confirmWindow);
+		confirmWindow.clear(sf::Color(240, 240, 240));
+	}
+}
+
+File: ConfirmationBtn.cpp
+--------------------------------------------------
+#include "ConfirmationBtn.h"
+
+
+ConfirmationBtn::ConfirmationBtn(std::string text, sf::Vector2f location, sf::Color color)
+	: Button(Text(text, sf::Vector2f(location.x + 30, location.y + 10), sf::Color::White, sf::Text::Regular, 20))
+{
+	m_rectangle.setSize(sf::Vector2f(140, 40));
+	m_rectangle.setPosition(location);
+	m_rectangle.setFillColor(color);
+}
+
+void ConfirmationBtn::update()
+{
+
+}
+
+void ConfirmationBtn::onClick()
+{
+}
+
+
+File: DataLoader.cpp
+--------------------------------------------------
+#include "DataLoader.h"
+
+DataLoader& DataLoader::Init()
+{
+    static DataLoader instance;
+    return instance;
+}
+
+sf::Font& DataLoader::getP2Font()
+{
+    auto& instance = Init();
+    return instance.m_font;
+}
+
+DataLoader::DataLoader()
+{
+    m_font.loadFromFile("C:/Windows/Fonts/arialbd.ttf");
+}
 
 
 File: DatabaseManager.cpp
@@ -755,6 +1340,92 @@ void DatabaseManager::saveBookingData(const std::string& bookingData) {
 std::vector<std::string> DatabaseManager::loadBookings() {
     // Load from file
     return {};
+}
+
+
+File: Date.cpp
+--------------------------------------------------
+#include "Date.h"
+
+int Date::getDay() const
+{
+	return m_day;
+}
+
+int Date::getMonth() const
+{
+	return m_month;
+}
+
+int Date::getYear() const
+{
+	return m_year;
+}
+
+Date::Date(int day, int month, int year)
+{
+	m_day = day;
+	m_month = month;
+	m_year = year;
+}
+Date::Date(const Date& other)
+{
+	*this = other;
+}
+
+Date& Date::operator=(const Date& other)
+{
+	if (this != &other)
+	{
+		m_day = other.m_day;
+		m_month = other.m_month;
+		m_year = other.m_year;
+	}
+	return *this;
+}
+bool Date::operator==(const Date& other) const
+{
+	return (m_day == other.m_day && m_month == other.m_month && m_year == other.m_year);
+}
+bool Date::operator!=(const Date& other) const
+{
+	return !(*this == other);
+}
+//std::istream& operator>>(std::istream& is, Date& date)
+//{
+//	is >> m_day >> m_month >> m_year;
+//	return is;
+//}
+std::ostream& operator<<(std::ostream& os, const Date& date)
+{
+	os << date.getDay() << "/" << date.getMonth() << "/" << date.getYear();
+	return os;
+}
+
+File: DateValidator.cpp
+--------------------------------------------------
+#include "DateValidator.h"
+
+bool DateValidator::validate(const Date& date) const
+{
+	int day = date.getDay();
+	int month = date.getMonth();
+	int year = date.getYear();
+    if ( // check if the year is leap year. first check if the year is bigger than zero and smaller or equal to 3000.
+        // the first check is if it february, check if the year is divisible to 4 and year not divisible to 100 or divisible to 400. in this case, the maximum day can be 29
+        (year > 0 && year <= 3000 && day > 0) &&
+        ((month == 2 && year % 4 == 0 && (year % 100 != 0 || year % 400 == 0) && day <= 29) ||
+            // else this is regular year so check if month is february, the day is samller or equal to 28
+            (month == 2 && day <= 28) ||
+            // check for the month the days need to be smaller than 30
+            (month == 4 || month == 6
+                || month == 9 || month == 11) && day <= 30 ||
+            // check for the month the days need to be smaller than 31.
+            (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) && day <= 31))
+    {
+        return true;
+    }
+    return false;
 }
 
 
@@ -816,6 +1487,23 @@ void DialogueManager::handleFormEvents() {
     }
 }
 
+
+
+File: EmailValidator.cpp
+--------------------------------------------------
+#include "EmailValidator.h"
+#include <regex>
+
+bool EmailValidator::validate(const std::string& email) 
+{
+    std::regex emailPattern(R"(^[A-Za-z0-9.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$)");
+    return std::regex_match(email, emailPattern);
+}
+
+std::string EmailValidator::getError()
+{
+    return "Enter Valid Email";
+}
 
 
 File: Engine.cpp
@@ -1410,6 +2098,48 @@ void HotelBookingForm::handleInput(sf::Event event) {
 }
 
 
+File: IDValidator.cpp
+--------------------------------------------------
+#include "IDValidator.h"
+
+
+
+bool IDValidator::validate(const uint32_t& fieldToValidate)
+{
+    int sum = 0, incNum;
+    uint32_t numArr[9] = { 0 };
+    uint32_t tmp = fieldToValidate;
+
+    // check the length of the number
+    if (fieldToValidate < 100000000 || fieldToValidate > 999999999) {
+        return false;
+    }
+
+    // convert the number to an array for easy check later
+    for (int i = 8; i >= 0; i--) {
+        numArr[i] = tmp % 10;
+        tmp = tmp / 10;
+    }
+
+    // validate the id number
+    for (int i = 0; i < 9; i++) {
+        incNum = numArr[i] * ((i % 2) + 1);
+        sum += (incNum > 9) ? incNum - 9 : incNum;
+    }
+    if (sum % 10 == 0) {
+        return true;
+    }
+
+    return false;
+
+}
+
+std::string IDValidator::getError()
+{
+    return "Not valid ID";
+}
+
+
 File: Logger.cpp
 --------------------------------------------------
 // Logger.cpp - Implements System Logging
@@ -1453,25 +2183,20 @@ Logger::~Logger() {
 }
 
 
-File: MainObject.cpp
+File: NameValidator.cpp
 --------------------------------------------------
-#include "MainObject.h"
+#include "NameValidator.h"
 
-MainObject::MainObject(std::string text = "", sf::Color color = sf::Color::Black, sf::Text::Style style = sf::Text::Bold
-	, unsigned int characterSize = 24, sf::Font font = sf::Font(),
-	sf::Vector2f location = sf::Vector2f(0, 0))
+bool NameValidator::validate(const std::string& name)
 {
-	m_text.setString(text);
-	m_text.setColor(color);
-	m_text.setStyle(style);
-	m_text.setCharacterSize(characterSize);
-	m_text.setFont(font);
-	m_text.setPosition(location);
+	for (int index = 0; index < name.length(); index++)
+		if (isdigit(name[index])) return false;
+	return true;
 }
 
-void MainObject::draw(sf::RenderWindow& window)
+std::string NameValidator::getError()
 {
-	window.draw(m_text);
+	return "No digits Allowed";
 }
 
 
@@ -1485,17 +2210,152 @@ void NotificationSystem::sendNotification(const std::string& message) {
 }
 
 
+File: SelectionButton.cpp
+--------------------------------------------------
+#include "SelectionButton.h"
+
+SelectionButton::SelectionButton(const std::string& text, sf::Vector2f location) : 
+	Button(Text(text,sf::Vector2f(location.x + 10 , location.y +5) , sf::Color::Black , sf::Text::Regular, 16))
+{
+	m_rectangle.setSize(sf::Vector2f(90, 30));
+	m_rectangle.setPosition(location);
+	m_rectangle.setFillColor(sf::Color::White);
+	m_rectangle.setOutlineThickness(2);
+	m_rectangle.setOutlineColor(sf::Color(160, 160, 160));
+}
+
+void SelectionButton::setClick(bool input)
+{
+	m_isClicked = input;
+}
+
+void SelectionButton::update()
+{ 
+	if (m_isClicked)
+	{
+		m_rectangle.setFillColor(sf::Color(0, 120, 255));
+		m_text.setFillColor(sf::Color::White);
+	}
+	else
+	{
+		m_rectangle.setFillColor(sf::Color::White);
+		m_text.setFillColor(sf::Color::Black);
+	}
+}
+
+void SelectionButton::onClick()
+{
+	//TODO
+}
+
+std::string SelectionButton::getText()
+{	
+	return m_text.getString();
+}
+
+
+File: SelectionField.cpp
+--------------------------------------------------
+#include "SelectionField.h"
+
+
+SelectionField::SelectionField(std::unique_ptr<BaseField> field, std::vector<std::unique_ptr<SelectionButton>> buttons)
+	:m_buttons(std::move(buttons))
+{
+	m_field = std::move(field);
+}
+
+SelectionField::SelectionField()
+	: m_field(std::make_unique<Field<NameValidator, std::string>>("")), m_buttons()
+{
+}
+
+void SelectionField::update(const sf::Time& time)
+{
+	for (auto& button : m_buttons)
+		button.get()->update();
+
+}
+
+bool SelectionField::contains(sf::Vector2f& coords)
+{
+	for (auto& button : m_buttons) {
+		if (button.get()->contains(coords))
+			return true;
+	}
+	return false;
+}
+
+void SelectionField::draw(sf::RenderWindow& window)
+{
+	m_field.get()->draw(window);
+	for (auto& button : m_buttons)
+		button.get()->draw(window);
+
+}
+
+void SelectionField::handleEvent(sf::Event& event)
+{
+	for (auto& button : m_buttons)
+	{
+		sf::Vector2f loc = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
+		if (button.get()->contains(loc))
+		{
+			m_field.get()->setText(button.get()->getText());
+			button.get()->setClick(true);
+		}
+		else {
+			button.get()->setClick(false);
+		}
+	}
+}
+
 File: Text.cpp
 --------------------------------------------------
 #include "Text.h"
 
-Text::Text(std::string text = "", sf::Color color = sf::Color::Black, sf::Text::Style style = sf::Text::Bold
-	, unsigned int characterSize = 24, sf::Font font = sf::Font(),
-	sf::Vector2f location = sf::Vector2f(0, 0)) : MainObject(text, color, style, characterSize, font)
+Text::Text(std::string text, sf::Vector2f location, sf::Color color, sf::Text::Style style,
+	unsigned int characterSize)
 {
+	m_text.setString(text);
+	m_text.setFillColor(color);
+	m_text.setStyle(style);
+	m_text.setCharacterSize(characterSize);
+	m_text.setFont(DataLoader::getP2Font());
+	m_text.setPosition(location);
+}
+
+void Text::draw(sf::RenderWindow& window)
+{
+
+	window.draw(m_text);
 }
 
 
+void Text::setText(std::string text)
+{
+	m_text.setString(text);
+}
+
+void Text::setLocation(sf::Vector2f newLocation)
+{
+	m_text.setPosition(newLocation);
+}
+
+void Text::setFillColor(const sf::Color& color)
+{
+	m_text.setFillColor(color);
+}
+
+sf::Text& Text::getText()
+{
+	return m_text;
+}
+
+std::string Text::getString()
+{
+	return m_text.getString();
+}
 
 
 File: TrainBookingForm.cpp

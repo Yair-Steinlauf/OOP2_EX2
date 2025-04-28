@@ -1,8 +1,10 @@
 #pragma once
 #include "Date.h"
-#include "BaseValidator.h"
 
-class DateValidator : public BaseValidator<Date> {
+
+class DateValidator {
 public:
-	bool validate(const Date& date) const;
+	static bool validate(const Date& date) ;
+	static std::string getError();
+
 };

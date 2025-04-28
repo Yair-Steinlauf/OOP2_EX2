@@ -101,3 +101,8 @@ void BookingForm::openConfirmationWindow() {
         formManager->closeForm();
     }
 }
+
+std::vector<std::string> BookingForm::validate()
+{
+    return std::vector<std::string>({""});
+}

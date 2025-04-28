@@ -1,4 +1,5 @@
 #include "Address.h"
+#include <string>
 
 std::string Address::getCity() const
 {
@@ -43,7 +44,17 @@ std::istream& operator>>(std::istream& is, Address& address)
 {
 	std::string street, city;
 	int number;
-	is >> street >> number >> city;
+	std::string line;
+	is >> line;
+	
+	size_t firstDash = line.find('-');
+	size_t secondDash = line.find('-', firstDash + 1);
+
+	if (firstDash != std::string::npos && secondDash != std::string::npos) {
+		street = line.substr(0, firstDash);
+		number = std::stoi(line.substr(firstDash + 1, secondDash - firstDash - 1));
+		city = line.substr(secondDash + 1);
+	}
 	address = Address(street, city, number);
 	return is;
 }
