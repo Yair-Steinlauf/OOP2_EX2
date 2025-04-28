@@ -97,7 +97,7 @@ void CarRentalForm::render(sf::RenderWindow& window) {
         object.draw(window);
     }
     m_selectionField.draw(window);
-
+    m_selectionField.update(cursorTimer.getElapsedTime());
     // ✅ Render input fields dynamically
    int yOffset = 60;
    for (std::size_t i = 0; i < fieldLabels.size(); ++i) {

@@ -45,7 +45,6 @@ void SelectionField::handleEvent(sf::Event& event)
 		{
 			m_field.get()->setText(button.get()->getText());
 			button.get()->setClick(true);
-			break;
 		}
 		else {
 			button.get()->setClick(false);
